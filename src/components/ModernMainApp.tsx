@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 // Import role-specific dashboards
 import { InstagramStyleCitizenDashboard } from './InstagramStyleCitizenDashboard';
 import { GovernmentOfficialDashboard } from './ModernGovernmentOfficialDashboard';
-import { WorkerDashboard } from './WorkerDashboard';
+import { WorkerDashboard } from './ModernWorkerDashboard';
 import { AdminDashboard } from './AdminDashboard';
 
 interface ModernMainAppProps {
@@ -111,7 +111,7 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
     // If worker is logged in, show worker dashboard
     if (worker) {
       console.log('Rendering WorkerDashboard for logged in worker:', worker);
-      return <WorkerDashboard worker={worker} onLogout={handleWorkerLogout} />;
+      return <WorkerDashboard user={worker} currentView={currentView} onViewChange={setCurrentView} />;
     }
 
     console.log('ModernMainApp - User role:', user.role, 'User object:', user);
