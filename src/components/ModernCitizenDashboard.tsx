@@ -523,6 +523,9 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
             body: formData,
           });
 
+          console.log('Upload response status:', uploadResponse.status);
+          console.log('Upload response ok:', uploadResponse.ok);
+
           if (uploadResponse.ok) {
             const uploadData = await uploadResponse.json();
             console.log('Files uploaded successfully:', uploadData);
@@ -539,6 +542,9 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
             console.log('Uploaded imageUrls:', imageUrls);
             console.log('Uploaded videoUrls:', videoUrls);
           } else {
+            const errorText = await uploadResponse.text();
+            console.error('File upload failed with status:', uploadResponse.status);
+            console.error('Upload error response:', errorText);
             console.warn('File upload failed, using local URLs as fallback');
             // Fallback to local URLs
             selectedFiles.forEach(file => {
