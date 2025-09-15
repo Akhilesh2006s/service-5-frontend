@@ -23,6 +23,8 @@ interface WorkerDashboardProps {
 export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ user, currentView, onViewChange }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showCompletionPostDialog, setShowCompletionPostDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const { posts, updatePost } = usePosts();
 
@@ -404,11 +406,24 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ user, currentV
               </div>
               
               <div className="mt-4 flex justify-end space-x-2">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setSelectedTask(task);
+                    setShowDetailsDialog(true);
+                  }}
+                >
                   <FileText className="h-4 w-4 mr-2" />
                   View Details
                 </Button>
-                <Button size="sm">
+                <Button 
+                  size="sm"
+                  onClick={() => {
+                    setSelectedTask(task);
+                    setShowCompletionPostDialog(true);
+                  }}
+                >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Create Completion Post
                 </Button>
@@ -461,6 +476,41 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ user, currentV
                 user={user}
                 onClose={() => setShowCompletionDialog(false)}
                 onUpdatePost={updatePost}
+              />
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Task Details Dialog */}
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Task Details</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+            {selectedTask && (
+              <TaskDetailsView 
+                task={selectedTask} 
+                onClose={() => setShowDetailsDialog(false)}
+              />
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Completion Post Dialog */}
+      <Dialog open={showCompletionPostDialog} onOpenChange={setShowCompletionPostDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Create Completion Post</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+            {selectedTask && (
+              <CompletionPostForm 
+                task={selectedTask} 
+                user={user}
+                onClose={() => setShowCompletionPostDialog(false)}
               />
             )}
           </ScrollArea>
@@ -568,6 +618,218 @@ const TaskCompletionForm: React.FC<{ task: any; user: any; onClose: () => void; 
         </Button>
         <Button type="submit" disabled={!workDone.trim()}>
           Complete Task
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+// Task Details View Component
+const TaskDetailsView: React.FC<{ task: any; onClose: () => void }> = ({ task, onClose }) => {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="font-semibold mb-2">Task Information</h3>
+          <div className="space-y-2 text-sm">
+            <p><span className="font-medium">ID:</span> {task.id}</p>
+            <p><span className="font-medium">Status:</span> {task.status}</p>
+            <p><span className="font-medium">Priority:</span> {task.priority}</p>
+            <p><span className="font-medium">Location:</span> {task.location}</p>
+            <p><span className="font-medium">Created:</span> {task.createdAt}</p>
+            {task.completedAt && (
+              <p><span className="font-medium">Completed:</span> {task.completedAt}</p>
+            )}
+          </div>
+        </div>
+        
+        <div>
+          <h3 className="font-semibold mb-2">Assignment Details</h3>
+          <div className="space-y-2 text-sm">
+            <p><span className="font-medium">Assigned To:</span> {task.assignedTo || 'Not assigned'}</p>
+            <p><span className="font-medium">Assigned By:</span> {task.assignedBy || 'Unknown'}</p>
+            {task.assignedAt && (
+              <p><span className="font-medium">Assigned At:</span> {task.assignedAt}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-semibold mb-2">Task Description</h3>
+        <p className="text-sm text-muted-foreground">{task.content}</p>
+      </div>
+
+      {task.mediaFiles && task.mediaFiles.length > 0 && (
+        <div>
+          <h3 className="font-semibold mb-2">Attached Media</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {task.mediaFiles.map((media: any, index: number) => (
+              <div key={index} className="rounded-lg overflow-hidden">
+                {media.type === 'image' ? (
+                  <img src={media.url} alt="Task media" className="w-full h-32 object-cover" />
+                ) : (
+                  <video
+                    src={media.url}
+                    controls
+                    className="w-full h-32 object-cover"
+                    preload="metadata"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {task.hashtags && task.hashtags.length > 0 && (
+        <div>
+          <h3 className="font-semibold mb-2">Tags</h3>
+          <div className="flex flex-wrap gap-2">
+            {task.hashtags.map((tag: string, index: number) => (
+              <Badge key={index} variant="secondary" className="text-xs">
+                <Hash className="h-3 w-3 mr-1" />
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-end">
+        <Button onClick={onClose}>Close</Button>
+      </div>
+    </div>
+  );
+};
+
+// Completion Post Form Component
+const CompletionPostForm: React.FC<{ task: any; user: any; onClose: () => void }> = ({ task, user, onClose }) => {
+  const [postContent, setPostContent] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!postContent.trim()) return;
+
+    setLoading(true);
+    try {
+      // Create a completion post
+      const completionPost = {
+        id: Date.now(),
+        user: {
+          name: user.name,
+          avatar: user.avatar || '',
+          role: 'worker'
+        },
+        content: postContent,
+        hashtags: ['#completed', '#workdone', `#task${task.id}`],
+        location: task.location,
+        status: 'completed',
+        priority: task.priority,
+        createdAt: new Date().toISOString(),
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        relatedTask: task.id,
+        completionImages: selectedFiles.filter(f => f.type.startsWith('image/')).map(f => URL.createObjectURL(f)),
+        completionVideos: selectedFiles.filter(f => f.type.startsWith('video/')).map(f => URL.createObjectURL(f))
+      };
+
+      // In a real app, this would be sent to the backend
+      console.log('Creating completion post:', completionPost);
+      
+      // Show success message
+      alert('Completion post created successfully!');
+      onClose();
+    } catch (error) {
+      console.error('Error creating completion post:', error);
+      alert('Failed to create completion post. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setSelectedFiles(prev => [...prev, ...files].slice(0, 5)); // Max 5 files
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <h3 className="font-semibold mb-2">Related Task</h3>
+        <div className="p-3 bg-muted/50 rounded-lg">
+          <p className="text-sm"><span className="font-medium">Task ID:</span> {task.id}</p>
+          <p className="text-sm"><span className="font-medium">Location:</span> {task.location}</p>
+          <p className="text-sm"><span className="font-medium">Priority:</span> {task.priority}</p>
+        </div>
+      </div>
+
+      <div>
+        <label className="text-sm font-medium">Post Content</label>
+        <Textarea
+          placeholder="Describe the work completed, challenges faced, and results achieved..."
+          value={postContent}
+          onChange={(e) => setPostContent(e.target.value)}
+          className="mt-1"
+          rows={4}
+          required
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-medium">Add Photos/Videos (Optional)</label>
+        <div className="mt-2">
+          <input
+            type="file"
+            multiple
+            accept="image/*,video/*"
+            onChange={handleFileSelect}
+            className="hidden"
+            id="completion-files"
+          />
+          <label
+            htmlFor="completion-files"
+            className="cursor-pointer inline-flex items-center px-4 py-2 border border-dashed border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Select Files
+          </label>
+        </div>
+        
+        {selectedFiles.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {selectedFiles.map((file, index) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                <span className="text-sm">{file.name}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeFile(index)}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={loading || !postContent.trim()}>
+          {loading ? 'Creating...' : 'Create Post'}
         </Button>
       </div>
     </form>
