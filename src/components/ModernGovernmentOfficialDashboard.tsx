@@ -913,7 +913,7 @@ const AddWorkerForm: React.FC<{ onClose: () => void; onAddWorker: (worker: any) 
     phone: '',
     department: '',
     designation: '',
-    password: Math.random().toString(36).slice(-8) // Auto-generate initial password
+    password: ''
   });
 
   // Reset form when component mounts
@@ -924,7 +924,7 @@ const AddWorkerForm: React.FC<{ onClose: () => void; onAddWorker: (worker: any) 
       phone: '',
       department: '',
       designation: '',
-      password: Math.random().toString(36).slice(-8)
+      password: ''
     });
   }, []);
 
@@ -1005,28 +1005,14 @@ const AddWorkerForm: React.FC<{ onClose: () => void; onAddWorker: (worker: any) 
       
       <div>
         <label className="text-sm font-medium">Password</label>
-        <div className="flex space-x-2">
-          <Input
-            value={formData.password}
-            onChange={(e) => handleChange('password', e.target.value)}
-            placeholder="Auto-generated password"
-            required
-            readOnly
-            className="bg-gray-50"
-          />
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => {
-              const newPassword = Math.random().toString(36).slice(-8);
-              handleChange('password', newPassword);
-            }}
-          >
-            Generate
-          </Button>
-        </div>
+        <Input
+          value={formData.password}
+          onChange={(e) => handleChange('password', e.target.value)}
+          placeholder="Enter worker's password"
+          required
+        />
         <p className="text-xs text-muted-foreground mt-1">
-          Password will be auto-generated. Click "Generate" to create a new one.
+          Enter a secure password for the worker to login.
         </p>
       </div>
       
