@@ -313,9 +313,21 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
   }, [token]);
 
   const addPost = async (post: Post) => {
+    console.log('Adding new post:', post);
     if (!token) {
-      // If no token, just add to local state
-      setPosts(prevPosts => [post, ...prevPosts]);
+      // If no token, just add to local state and save to localStorage
+      setPosts(prevPosts => {
+        const newPosts = [post, ...prevPosts];
+        console.log('Adding post to local state, new posts:', newPosts);
+        // Save to localStorage
+        try {
+          localStorage.setItem('local-gov-posts', JSON.stringify(newPosts));
+          console.log('Saved posts to localStorage');
+        } catch (error) {
+          console.error('Error saving to localStorage:', error);
+        }
+        return newPosts;
+      });
       return;
     }
 
@@ -342,15 +354,27 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
 
       if (response.ok) {
         const newBackendPost = await response.json();
+        console.log('Backend created post:', newBackendPost);
         const convertedPost = convertBackendPost(newBackendPost);
-        setPosts(prevPosts => [convertedPost, ...prevPosts]);
+        console.log('Converted post:', convertedPost);
+        setPosts(prevPosts => {
+          const newPosts = [convertedPost, ...prevPosts];
+          console.log('Added post to state, new posts:', newPosts);
+          return newPosts;
+        });
       } else {
-        throw new Error('Failed to create post');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Backend error:', errorData);
+        throw new Error(errorData.message || 'Failed to create post');
       }
     } catch (err) {
       console.error('Error creating post:', err);
       // Fallback to local state
-      setPosts(prevPosts => [post, ...prevPosts]);
+      setPosts(prevPosts => {
+        const newPosts = [post, ...prevPosts];
+        console.log('Fallback: Adding post to local state:', newPosts);
+        return newPosts;
+      });
     }
   };
 

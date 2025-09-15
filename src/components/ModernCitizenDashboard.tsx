@@ -376,6 +376,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                 user={user}
                 onClose={() => setShowCreatePost(false)}
                 onPostCreated={(newPost) => {
+                  console.log('onPostCreated called with:', newPost);
                   addPost(newPost);
                   setShowCreatePost(false);
                 }}
