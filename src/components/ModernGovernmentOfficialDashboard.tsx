@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { usePosts } from '@/contexts/PostsContext';
+import { useUsers } from '@/contexts/UsersContext';
 import { MediaTestComponent } from './MediaTestComponent';
 
 interface GovernmentOfficialDashboardProps {
@@ -32,6 +33,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
   const [showReviewDetailsDialog, setShowReviewDetailsDialog] = useState(false);
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const { posts, updatePost, likePost, addComment, refreshPosts } = usePosts();
+  const { workers: contextWorkers, addWorker } = useUsers();
 
   const [workers, setWorkers] = useState([]);
   const [workersLoading, setWorkersLoading] = useState(false);
@@ -95,11 +97,30 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
     setStatistics(stats);
   }, [posts, workers, tasks]);
 
-  // Fetch workers from backend
+  // Update workers when contextWorkers changes
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token && token.startsWith('local_')) {
+      setWorkers(contextWorkers);
+    }
+  }, [contextWorkers]);
+
+  // Fetch workers from backend or context
   const fetchWorkers = async () => {
     setWorkersLoading(true);
     try {
       const token = localStorage.getItem('token');
+      
+      // Check if user is using local authentication
+      if (token && token.startsWith('local_')) {
+        // Use context workers for local users
+        console.log('Using context workers:', contextWorkers);
+        setWorkers(contextWorkers);
+        setWorkersLoading(false);
+        return;
+      }
+      
+      // Use backend API for authenticated users
       const response = await fetch('https://service-5-backend-production.up.railway.app/api/workers', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -125,6 +146,17 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
   const handleAddWorker = async (newWorker: any) => {
     try {
       const token = localStorage.getItem('token');
+      
+      // Check if user is using local authentication
+      if (token && token.startsWith('local_')) {
+        // Use UsersContext for local users
+        console.log('Adding worker via UsersContext:', newWorker);
+        addWorker(newWorker);
+        console.log('Worker added successfully via UsersContext');
+        return;
+      }
+      
+      // Use backend API for authenticated users
       const response = await fetch('https://service-5-backend-production.up.railway.app/api/workers', {
         method: 'POST',
         headers: {
@@ -140,9 +172,11 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
         console.log('Worker created successfully:', createdWorker);
       } else {
         console.error('Failed to create worker:', response.status);
+        throw new Error(`Failed to create worker: ${response.status}`);
       }
     } catch (error) {
       console.error('Error creating worker:', error);
+      throw error;
     }
   };
 
