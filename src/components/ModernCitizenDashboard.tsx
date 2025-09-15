@@ -266,13 +266,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
               content: 'Test post - this is working! #test #working',
               image: null,
               video: null,
-              mediaFiles: [
-                {
-                  file: null,
-                  url: 'https://picsum.photos/400/300?random=' + Date.now(),
-                  type: 'image'
-                }
-              ],
+              mediaFiles: [],
               hashtags: ['#test', '#working'],
               location: 'Test Location',
               status: 'pending',
@@ -484,19 +478,19 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
         ...hashtags.split(' ').filter(tag => tag.startsWith('#'))
       ])];
 
-      // For now, use placeholder images to ensure posts work
+      // Use actual uploaded files
       let imageUrls = [];
       let videoUrls = [];
       
-      // Add some sample images if files are selected
+      // Add actual file URLs if files are selected
       if (selectedFiles.length > 0) {
         selectedFiles.forEach(file => {
           if (file.type.startsWith('image/')) {
-            // Use a placeholder image service for now
-            imageUrls.push('https://picsum.photos/400/300?random=' + Date.now());
+            // Use the actual file URL
+            imageUrls.push(URL.createObjectURL(file));
           } else if (file.type.startsWith('video/')) {
-            // Use a placeholder video for now
-            videoUrls.push('https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4');
+            // Use the actual file URL
+            videoUrls.push(URL.createObjectURL(file));
           }
         });
       }
@@ -576,7 +570,7 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
           video: null,
           mediaFiles: selectedFiles.map(file => ({
             file: file,
-            url: file.type.startsWith('image/') ? 'https://picsum.photos/400/300?random=' + Date.now() : 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
+            url: URL.createObjectURL(file),
             type: file.type.startsWith('image/') ? 'image' : 'video'
           })),
           hashtags: allHashtags,

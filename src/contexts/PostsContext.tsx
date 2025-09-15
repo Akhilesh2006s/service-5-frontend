@@ -287,13 +287,7 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
               content: 'The street lights on Main Street have been out for 3 days now. It\'s getting dangerous to walk at night. #streetlights #safety #mainstreet',
               image: null,
               video: null,
-              mediaFiles: [
-                {
-                  file: null,
-                  url: 'https://picsum.photos/400/300?random=1',
-                  type: 'image'
-                }
-              ],
+              mediaFiles: [],
               hashtags: ['#streetlights', '#safety', '#mainstreet'],
               location: 'Main Street, Downtown',
               status: 'assigned',
@@ -309,13 +303,7 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
               content: 'Large pothole on Oak Avenue causing traffic issues. Cars are swerving to avoid it. #potholes #roads #oakavenue',
               image: null,
               video: null,
-              mediaFiles: [
-                {
-                  file: null,
-                  url: 'https://picsum.photos/400/300?random=2',
-                  type: 'image'
-                }
-              ],
+              mediaFiles: [],
               hashtags: ['#potholes', '#roads', '#oakavenue'],
               location: 'Oak Avenue',
               status: 'pending',
@@ -331,13 +319,7 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
               content: 'Garbage collection was missed on Pine Street. Bins are overflowing. #garbage #sanitation #missedcollection',
               image: null,
               video: null,
-              mediaFiles: [
-                {
-                  file: null,
-                  url: 'https://picsum.photos/400/300?random=3',
-                  type: 'image'
-                }
-              ],
+              mediaFiles: [],
               hashtags: ['#garbage', '#sanitation', '#missedcollection'],
               location: 'Pine Street',
               status: 'in-progress',
