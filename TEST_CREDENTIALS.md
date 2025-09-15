@@ -1,157 +1,127 @@
-# 🏛️ Government Management System - Test Credentials
+# Test Credentials for Local Gov Sphere Connect
 
-## 🔧 Main Administrator
-**Email:** `amenityforge@gmail.com`  
-**Password:** `Amenity`  
-**Role:** System Administrator  
-**Access:** Full system control, department management, user creation
+## Admin Account
+- **Email**: admin@city.gov
+- **Password**: admin123
+- **Role**: Admin
+- **Permissions**: Create government officials, create workers, view all posts, manage departments
 
----
+## Government Official Account
+- **Email**: official@city.gov
+- **Password**: official123
+- **Role**: Government Official
+- **Department**: Public Works
+- **Permissions**: Assign tasks to workers, review completed work, manage workers
 
-## 👔 Government Officials
-### Health Department
-**Email:** `sarah.johnson@health.gov`  
-**Password:** `password123`  
-**Role:** Health Director  
-**Department:** Health Department
+## Worker Account
+- **Email**: worker@city.gov
+- **Password**: worker123
+- **Role**: Worker
+- **Department**: Public Works
+- **Designation**: Field Technician
+- **Permissions**: View assigned tasks, submit proof of completion
 
-### Education Department  
-**Email:** `michael.chen@education.gov`  
-**Password:** `password123`  
-**Role:** Education Director  
-**Department:** Education Department
+## Citizen Account
+- **Email**: citizen@example.com
+- **Password**: citizen123
+- **Role**: Citizen
+- **Location**: Downtown
+- **Permissions**: Create posts, view other posts, like and comment
 
-### Public Works Department
-**Email:** `david.wilson@publicworks.gov`  
-**Password:** `password123`  
-**Role:** Public Works Director  
-**Department:** Public Works Department
+## Test Flow Instructions
 
----
+### 1. Admin Flow
+1. Login as admin@city.gov
+2. Go to "Manage Officials" - Create a new government official
+3. Go to "Manage Workers" - Create a new worker
+4. View analytics dashboard with real data
 
-## 👷 Field Workers
-### Health Department Worker
-**Email:** `john.smith@health.gov`  
-**Password:** `password123`  
-**Role:** Health Inspector  
-**Department:** Health Department  
-**Assigned To:** Dr. Sarah Johnson
+### 2. Government Official Flow
+1. Login as official@city.gov
+2. View department feed with posts
+3. Assign a worker to a pending post
+4. Review completed tasks
+5. Manage workers in department
 
-### Education Department Worker
-**Email:** `maria.garcia@education.gov`  
-**Password:** `password123`  
-**Role:** School Inspector  
-**Department:** Education Department  
-**Assigned To:** Prof. Michael Chen
+### 3. Worker Flow
+1. Login as worker@city.gov
+2. View assigned tasks
+3. Submit proof of completion for a task
+4. View completed tasks
 
-### Public Works Department Worker
-**Email:** `robert.brown@publicworks.gov`  
-**Password:** `password123`  
-**Role:** Field Engineer  
-**Department:** Public Works Department  
-**Assigned To:** Eng. David Wilson
+### 4. Citizen Flow
+1. Login as citizen@example.com
+2. Create a new post with photos/videos
+3. View other posts in feed
+4. Like and comment on posts
+5. View personal statistics
 
----
+### 5. Complete Workflow Test
+1. Citizen creates a post about a pothole
+2. Government official assigns the task to a worker
+3. Worker completes the task and submits proof
+4. Government official reviews and approves the work
+5. Post status updates to resolved
 
-## 👤 Citizens
-### Test Citizen 1
-**Email:** `alice.johnson@email.com`  
-**Password:** `password123`  
-**Role:** Citizen  
-**Location:** Sector 15, Noida  
-**Aadhaar:** 123456789012
+## API Endpoints
 
-### Test Citizen 2
-**Email:** `bob.smith@email.com`  
-**Password:** `password123`  
-**Role:** Citizen  
-**Location:** Connaught Place, Delhi  
-**Aadhaar:** 987654321098
+### Authentication
+- POST `/api/auth/login` - Login user
+- POST `/api/auth/register` - Register citizen
+- GET `/api/auth/me` - Get current user
 
-### Test Citizen 3
-**Email:** `carol.davis@email.com`  
-**Password:** `password123`  
-**Role:** Citizen  
-**Location:** MG Road, Bangalore  
-**Aadhaar:** 112233445566
+### Posts
+- GET `/api/posts` - Get all posts
+- POST `/api/posts` - Create new post
+- PATCH `/api/posts/:id` - Update post
 
----
+### Tasks
+- GET `/api/tasks` - Get tasks for user
+- POST `/api/tasks` - Create new task
+- PATCH `/api/tasks/:id/status` - Update task status
+- PATCH `/api/tasks/:id/review` - Review task
 
-## 🚀 How to Test the System
+### Workers
+- GET `/api/workers` - Get all workers
+- POST `/api/workers` - Create new worker
+- POST `/api/workers/login` - Worker login
 
-### 1. **Admin Testing:**
-- Login with `amenityforge@gmail.com` / `Amenity`
-- Access Admin Dashboard
-- Create new departments
-- Create new officials and workers
-- View system statistics
+### Users
+- GET `/api/users` - Get users (admin only)
+- POST `/api/users` - Create user (admin only)
 
-### 2. **Government Official Testing:**
-- Login with any official credentials
-- Access Government Official Dashboard
-- View department issues
-- Assign tasks to workers
-- Create new workers
-- Generate reports
+### Upload
+- POST `/api/upload/multiple` - Upload multiple files
 
-### 3. **Worker Testing:**
-- Login with any worker credentials
-- Access Worker Dashboard
-- View assigned tasks
-- Update task status
-- Upload work proof
-- Mark tasks as complete
+## Database Collections
 
-### 4. **Citizen Testing:**
-- Register new citizen account (only citizens can self-register)
-- Access Citizen Dashboard
-- Report new issues
-- Track issue status
-- Upvote important issues
+### Users
+- Citizens: Can create posts, view feed
+- Government Officials: Can assign tasks, review work
+- Workers: Can view tasks, submit proof
+- Admins: Can manage all users
 
----
+### Posts
+- Created by citizens
+- Can have multiple media files
+- Status: pending, assigned, in_progress, completed, resolved
 
-## 🔄 Complete Workflow Test
+### Tasks
+- Created by government officials
+- Assigned to workers
+- Status: assigned, in_progress, completed, closed
+- Can have work proof and remarks
 
-1. **Citizen** reports an issue
-2. **Government Official** assigns it to a worker
-3. **Worker** executes the task and updates status
-4. **Official** reviews and generates report
-5. **Citizen** receives resolution notification
+## Testing Checklist
 
----
-
-## 📱 System Access
-
-- **Frontend:** http://localhost:8080
-- **Backend API:** https://service-5-backend-production.up.railway.app
-- **Database:** MongoDB Atlas
-
----
-
-## 🛡️ Security Features
-
-- ✅ **Role-Based Access Control:** Each role has specific permissions
-- ✅ **Citizen-Only Registration:** Only citizens can self-register
-- ✅ **Admin-Controlled Users:** Officials and workers created by admin
-- ✅ **JWT Authentication:** Secure token-based authentication
-- ✅ **Password Hashing:** All passwords are securely hashed
-- ✅ **Department Isolation:** Officials only see their department's data
-
----
-
-## 🎯 Key Features to Test
-
-- **Professional UI:** Modern, responsive design
-- **Role-Specific Dashboards:** Each role has unique interface
-- **Real-Time Updates:** Live status tracking
-- **File Uploads:** Support for images and documents
-- **Digital Signatures:** Official report generation
-- **Mobile Responsive:** Works on all devices
-- **Professional Navigation:** Role-based menu system
-
----
-
-*All test users are pre-verified and ready to use. The system is fully functional with all 4 roles working together seamlessly.*
-
-
+- [ ] Admin can create government officials
+- [ ] Admin can create workers
+- [ ] Government official can assign tasks
+- [ ] Worker can view assigned tasks
+- [ ] Worker can submit proof
+- [ ] Government official can review tasks
+- [ ] Citizen can create posts with media
+- [ ] All dashboards show correct analytics
+- [ ] Media upload and display works
+- [ ] Authentication works for all roles
+- [ ] Task workflow completes end-to-end

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BarChart3, Users, CheckCircle, AlertCircle, Clock, TrendingUp, UserPlus, Settings, FileText, MapPin, Hash, Filter, Search } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BarChart3, Users, CheckCircle, AlertCircle, Clock, TrendingUp, UserPlus, Settings, FileText, MapPin, Hash, Filter, Search, Eye, Trash2, Edit, Mail, Phone, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { usePosts } from '@/contexts/PostsContext';
 
 interface AdminDashboardProps {
   user: any;
@@ -23,31 +25,135 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentView, onViewChange }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddUserDialog, setShowAddUserDialog] = useState(false);
+  const [governmentOfficials, setGovernmentOfficials] = useState([]);
+  const [workers, setWorkers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { posts } = usePosts();
 
-  // Mock analytics data
+  // Calculate real analytics data from posts
   const analyticsData = {
-    totalPosts: 1247,
-    solvedProblems: 892,
-    pendingIssues: 234,
-    inProgressIssues: 121,
-    totalUsers: 3421,
-    governmentOfficials: 45,
-    workers: 128,
-    citizens: 3248
+    totalPosts: posts.length,
+    solvedProblems: posts.filter(p => p.status === 'completed').length,
+    pendingIssues: posts.filter(p => p.status === 'pending').length,
+    inProgressIssues: posts.filter(p => p.status === 'assigned' || p.status === 'in_progress').length,
+    totalUsers: governmentOfficials.length + workers.length + posts.filter(p => p.user.role === 'citizen').length,
+    governmentOfficials: governmentOfficials.length,
+    workers: workers.length,
+    citizens: posts.filter(p => p.user.role === 'citizen').length
   };
 
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchGovernmentOfficials();
+    fetchWorkers();
+  }, []);
+
+  // Fetch government officials
+  const fetchGovernmentOfficials = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://service-5-backend-production.up.railway.app/api/users?role=government', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const officials = await response.json();
+        setGovernmentOfficials(officials);
+      }
+    } catch (error) {
+      console.error('Error fetching government officials:', error);
+    }
+  };
+
+  // Fetch workers
+  const fetchWorkers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://service-5-backend-production.up.railway.app/api/workers', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const workersData = await response.json();
+        setWorkers(workersData);
+      }
+    } catch (error) {
+      console.error('Error fetching workers:', error);
+    }
+  };
+
+  // Create government official
+  const createGovernmentOfficial = async (userData: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://service-5-backend-production.up.railway.app/api/users', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...userData,
+          role: 'government'
+        })
+      });
+      
+      if (response.ok) {
+        const newOfficial = await response.json();
+        setGovernmentOfficials(prev => [...prev, newOfficial]);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error creating government official:', error);
+      return false;
+    }
+  };
+
+  // Create worker
+  const createWorker = async (workerData: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://service-5-backend-production.up.railway.app/api/workers', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(workerData)
+      });
+      
+      if (response.ok) {
+        const newWorker = await response.json();
+        setWorkers(prev => [...prev, newWorker]);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error creating worker:', error);
+      return false;
+    }
+  };
+
+  // Calculate posts by department from real data
   const postsByDepartment = [
-    { name: 'Public Works', posts: 45, solved: 38, pending: 7 },
-    { name: 'Road Maintenance', posts: 32, solved: 28, pending: 4 },
-    { name: 'Sanitation', posts: 28, solved: 25, pending: 3 },
-    { name: 'Parks & Recreation', posts: 15, solved: 12, pending: 3 },
-    { name: 'Utilities', posts: 12, solved: 10, pending: 2 }
+    { name: 'Public Works', posts: posts.filter(p => p.department === 'Public Works').length, solved: posts.filter(p => p.department === 'Public Works' && p.status === 'completed').length, pending: posts.filter(p => p.department === 'Public Works' && p.status === 'pending').length },
+    { name: 'Road Maintenance', posts: posts.filter(p => p.department === 'Road Maintenance').length, solved: posts.filter(p => p.department === 'Road Maintenance' && p.status === 'completed').length, pending: posts.filter(p => p.department === 'Road Maintenance' && p.status === 'pending').length },
+    { name: 'Sanitation', posts: posts.filter(p => p.department === 'Sanitation').length, solved: posts.filter(p => p.department === 'Sanitation' && p.status === 'completed').length, pending: posts.filter(p => p.department === 'Sanitation' && p.status === 'pending').length },
+    { name: 'Parks & Recreation', posts: posts.filter(p => p.department === 'Parks & Recreation').length, solved: posts.filter(p => p.department === 'Parks & Recreation' && p.status === 'completed').length, pending: posts.filter(p => p.department === 'Parks & Recreation' && p.status === 'pending').length },
+    { name: 'Utilities', posts: posts.filter(p => p.department === 'Utilities').length, solved: posts.filter(p => p.department === 'Utilities' && p.status === 'completed').length, pending: posts.filter(p => p.department === 'Utilities' && p.status === 'pending').length }
   ];
 
   const postsByStatus = [
-    { name: 'Completed', value: 892, color: '#10b981' },
-    { name: 'In Progress', value: 121, color: '#f59e0b' },
-    { name: 'Pending', value: 234, color: '#ef4444' }
+    { name: 'Completed', value: posts.filter(p => p.status === 'completed').length, color: '#10b981' },
+    { name: 'In Progress', value: posts.filter(p => p.status === 'assigned' || p.status === 'in_progress').length, color: '#f59e0b' },
+    { name: 'Pending', value: posts.filter(p => p.status === 'pending').length, color: '#ef4444' }
   ];
 
   const monthlyTrends = [
@@ -214,7 +320,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
       </div>
 
       <div className="grid gap-4">
-        {mockUsers.filter(user => user.role === 'government_official').map((official) => (
+        {governmentOfficials.map((official) => (
           <Card key={official.id}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -227,18 +333,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
                     <p className="font-medium">{official.name}</p>
                     <p className="text-sm text-muted-foreground">{official.email}</p>
                     <p className="text-sm text-muted-foreground">Department: {official.department}</p>
+                    <p className="text-sm text-muted-foreground">Designation: {official.designation}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Badge className={cn("text-xs", getRoleColor(official.role))}>
                     Government Official
                   </Badge>
-                  <Badge className={cn("text-xs", getStatusColor(official.status))}>
-                    {official.status}
+                  <Badge className={cn("text-xs", getStatusColor(official.verified ? 'active' : 'inactive'))}>
+                    {official.verified ? 'Active' : 'Inactive'}
                   </Badge>
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-600">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </CardContent>
@@ -259,7 +384,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
       </div>
 
       <div className="grid gap-4">
-        {mockUsers.filter(user => user.role === 'worker').map((worker) => (
+        {workers.map((worker) => (
           <Card key={worker.id}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -272,6 +397,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
                     <p className="font-medium">{worker.name}</p>
                     <p className="text-sm text-muted-foreground">{worker.email}</p>
                     <p className="text-sm text-muted-foreground">Department: {worker.department}</p>
+                    <p className="text-sm text-muted-foreground">Designation: {worker.designation}</p>
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      <Phone className="h-3 w-3" />
+                      <span>{worker.phone}</span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -281,9 +411,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
                   <Badge className={cn("text-xs", getStatusColor(worker.status))}>
                     {worker.status}
                   </Badge>
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-600">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </CardContent>
@@ -328,7 +476,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
           </DialogHeader>
-          <AddUserForm onClose={() => setShowAddUserDialog(false)} />
+          <AddUserForm 
+            onClose={() => setShowAddUserDialog(false)} 
+            onCreateUser={async (userData) => {
+              if (userData.role === 'government') {
+                return await createGovernmentOfficial(userData);
+              } else if (userData.role === 'worker') {
+                return await createWorker(userData);
+              }
+              return false;
+            }}
+          />
         </DialogContent>
       </Dialog>
     </div>
@@ -336,19 +494,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
 };
 
 // Add User Form Component
-const AddUserForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+const AddUserForm: React.FC<{ onClose: () => void; onCreateUser: (userData: any) => Promise<boolean> }> = ({ onClose, onCreateUser }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     role: '',
     department: '',
+    designation: '',
+    phone: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Adding user:', formData);
-    onClose();
+    setLoading(true);
+    
+    try {
+      const success = await onCreateUser(formData);
+      if (success) {
+        onClose();
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          role: '',
+          department: '',
+          designation: '',
+          phone: '',
+          password: ''
+        });
+      } else {
+        alert('Failed to create user. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+      alert('Failed to create user. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (field: string, value: string) => {
@@ -383,30 +567,48 @@ const AddUserForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             <SelectValue placeholder="Select role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="citizen">Citizen</SelectItem>
-            <SelectItem value="government_official">Government Official</SelectItem>
+            <SelectItem value="government">Government Official</SelectItem>
             <SelectItem value="worker">Worker</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
           </SelectContent>
         </Select>
       </div>
       
-      {formData.role && (formData.role === 'government_official' || formData.role === 'worker') && (
-        <div>
-          <label className="text-sm font-medium">Department</label>
-          <Select value={formData.department} onValueChange={(value) => handleChange('department', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select department" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Public Works">Public Works</SelectItem>
-              <SelectItem value="Road Maintenance">Road Maintenance</SelectItem>
-              <SelectItem value="Sanitation">Sanitation</SelectItem>
-              <SelectItem value="Parks & Recreation">Parks & Recreation</SelectItem>
-              <SelectItem value="Utilities">Utilities</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      {formData.role && (formData.role === 'government' || formData.role === 'worker') && (
+        <>
+          <div>
+            <label className="text-sm font-medium">Department</label>
+            <Select value={formData.department} onValueChange={(value) => handleChange('department', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Public Works">Public Works</SelectItem>
+                <SelectItem value="Road Maintenance">Road Maintenance</SelectItem>
+                <SelectItem value="Sanitation">Sanitation</SelectItem>
+                <SelectItem value="Parks & Recreation">Parks & Recreation</SelectItem>
+                <SelectItem value="Utilities">Utilities</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <label className="text-sm font-medium">Designation</label>
+            <Input
+              placeholder="e.g., Senior Officer, Field Supervisor"
+              value={formData.designation}
+              onChange={(e) => handleChange('designation', e.target.value)}
+            />
+          </div>
+          
+          <div>
+            <label className="text-sm font-medium">Phone</label>
+            <Input
+              placeholder="+1-555-0123"
+              value={formData.phone}
+              onChange={(e) => handleChange('phone', e.target.value)}
+            />
+          </div>
+        </>
       )}
       
       <div>
@@ -423,8 +625,8 @@ const AddUserForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={!formData.name || !formData.email || !formData.role || !formData.password}>
-          Add User
+        <Button type="submit" disabled={loading || !formData.name || !formData.email || !formData.role || !formData.password}>
+          {loading ? 'Creating...' : 'Add User'}
         </Button>
       </div>
     </form>

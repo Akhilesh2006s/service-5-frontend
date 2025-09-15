@@ -34,21 +34,49 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
 
   const [workers, setWorkers] = useState([]);
   const [workersLoading, setWorkersLoading] = useState(false);
+  const [tasks, setTasks] = useState([]);
   const [statistics, setStatistics] = useState({
     totalPosts: 0,
     assignedPosts: 0,
     completedPosts: 0,
     pendingPosts: 0,
     totalWorkers: 0,
-    activeWorkers: 0
+    activeWorkers: 0,
+    totalTasks: 0,
+    completedTasks: 0,
+    pendingTasks: 0
   });
 
   const departments = ['Public Works', 'Road Maintenance', 'Sanitation', 'Parks & Recreation', 'Utilities'];
 
-  // Fetch workers on component mount
+  // Fetch workers and tasks on component mount
   useEffect(() => {
     fetchWorkers();
+    fetchTasks();
   }, []);
+
+  // Fetch tasks
+  const fetchTasks = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://service-5-backend-production.up.railway.app/api/tasks', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const tasksData = await response.json();
+        setTasks(tasksData);
+        console.log('Tasks fetched from backend:', tasksData);
+      } else {
+        console.error('Failed to fetch tasks:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
 
   // Calculate statistics
   useEffect(() => {
@@ -58,10 +86,13 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
       completedPosts: posts.filter(p => p.status === 'completed').length,
       pendingPosts: posts.filter(p => p.status === 'pending').length,
       totalWorkers: workers.length,
-      activeWorkers: workers.filter(w => w.status === 'available').length
+      activeWorkers: workers.filter(w => w.status === 'available').length,
+      totalTasks: tasks.length,
+      completedTasks: tasks.filter(t => t.status === 'completed' || t.status === 'closed').length,
+      pendingTasks: tasks.filter(t => t.status === 'assigned' || t.status === 'in-progress').length
     };
     setStatistics(stats);
-  }, [posts, workers]);
+  }, [posts, workers, tasks]);
 
   // Fetch workers from backend
   const fetchWorkers = async () => {
@@ -111,6 +142,34 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
       }
     } catch (error) {
       console.error('Error creating worker:', error);
+    }
+  };
+
+  // Create task
+  const createTask = async (taskData: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://service-5-backend-production.up.railway.app/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(taskData)
+      });
+      
+      if (response.ok) {
+        const newTask = await response.json();
+        setTasks(prev => [...prev, newTask]);
+        console.log('Task created successfully:', newTask);
+        return true;
+      } else {
+        console.error('Failed to create task:', response.status);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error creating task:', error);
+      return false;
     }
   };
 
@@ -698,7 +757,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
       </div>
 
       {/* Statistics Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center">
@@ -716,20 +775,8 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
             <div className="flex items-center">
               <Clock className="h-8 w-8 text-yellow-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Pending</p>
-                <p className="text-2xl font-semibold text-gray-900">{statistics.pendingPosts}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <Users className="h-8 w-8 text-blue-600" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Assigned</p>
-                <p className="text-2xl font-semibold text-gray-900">{statistics.assignedPosts}</p>
+                <p className="text-sm font-medium text-gray-500">Pending Tasks</p>
+                <p className="text-2xl font-semibold text-gray-900">{statistics.pendingTasks}</p>
               </div>
             </div>
           </CardContent>
@@ -740,8 +787,8 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
             <div className="flex items-center">
               <CheckCircle className="h-8 w-8 text-green-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Completed</p>
-                <p className="text-2xl font-semibold text-gray-900">{statistics.completedPosts}</p>
+                <p className="text-sm font-medium text-gray-500">Completed Tasks</p>
+                <p className="text-2xl font-semibold text-gray-900">{statistics.completedTasks}</p>
               </div>
             </div>
           </CardContent>
@@ -754,18 +801,6 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-500">Total Workers</p>
                 <p className="text-2xl font-semibold text-gray-900">{statistics.totalWorkers}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <CheckCircle className="h-8 w-8 text-green-600" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Active Workers</p>
-                <p className="text-2xl font-semibold text-gray-900">{statistics.activeWorkers}</p>
               </div>
             </div>
           </CardContent>
@@ -787,6 +822,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
               onClose={() => setShowAssignDialog(false)}
               onUpdatePost={updatePost}
               user={user}
+              onCreateTask={createTask}
             />
           )}
         </DialogContent>
@@ -841,28 +877,57 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
 };
 
 // Assign Worker Form Component
-const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => void; onUpdatePost: (id: number, updates: any) => void; user: any }> = ({ post, workers, onClose, onUpdatePost, user }) => {
+const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => void; onUpdatePost: (id: number, updates: any) => void; user: any; onCreateTask: (taskData: any) => Promise<boolean> }> = ({ post, workers, onClose, onUpdatePost, user, onCreateTask }) => {
   const [selectedWorker, setSelectedWorker] = useState('none');
-  const [priority, setPriority] = useState(post.priority);
+  const [priority, setPriority] = useState(post.priority || 'medium');
   const [notes, setNotes] = useState('');
+  const [instructions, setInstructions] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedWorkerData = workers.find(w => w.id.toString() === selectedWorker);
-    const assignmentDetails = {
-      status: 'assigned',
-      assignedTo: selectedWorkerData?.name,
-      assignedWorker: selectedWorker,
-      assignedWorkerId: selectedWorker,
-      assignedBy: user.name,
-      assignedByRole: user.role,
-      assignedAt: new Date().toISOString(),
-      priority: priority,
-      notes: notes
-    };
-    onUpdatePost(post.id, assignmentDetails);
-    console.log('Assigning worker:', { post: post.id, assignmentDetails });
-    onClose();
+    if (selectedWorker === 'none') return;
+    
+    setLoading(true);
+    try {
+      const selectedWorkerData = workers.find(w => w.id.toString() === selectedWorker);
+      
+      // Create task in backend
+      const taskData = {
+        postId: post.id,
+        assignedTo: selectedWorker,
+        description: post.content,
+        instructions: instructions,
+        priority: priority
+      };
+      
+      const taskCreated = await onCreateTask(taskData);
+      
+      if (taskCreated) {
+        // Update post status locally
+        const assignmentDetails = {
+          status: 'assigned',
+          assignedTo: selectedWorkerData?.name,
+          assignedWorker: selectedWorker,
+          assignedWorkerId: selectedWorker,
+          assignedBy: user.name,
+          assignedByRole: user.role,
+          assignedAt: new Date().toISOString(),
+          priority: priority,
+          notes: notes
+        };
+        onUpdatePost(post.id, assignmentDetails);
+        console.log('Task created and worker assigned:', { post: post.id, assignmentDetails });
+        onClose();
+      } else {
+        alert('Failed to create task. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating task:', error);
+      alert('Failed to create task. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const availableWorkers = workers.filter(worker => 
@@ -913,9 +978,19 @@ const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => voi
       </div>
       
       <div>
+        <label className="text-sm font-medium">Instructions</label>
+        <Textarea
+          placeholder="Add specific instructions for the worker..."
+          value={instructions}
+          onChange={(e) => setInstructions(e.target.value)}
+          required
+        />
+      </div>
+      
+      <div>
         <label className="text-sm font-medium">Notes (Optional)</label>
         <Textarea
-          placeholder="Add any specific instructions..."
+          placeholder="Add any additional notes..."
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
         />
@@ -925,8 +1000,8 @@ const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => voi
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-         <Button type="submit" disabled={!selectedWorker || selectedWorker === 'none'}>
-           Assign Task
+         <Button type="submit" disabled={loading || !selectedWorker || selectedWorker === 'none' || !instructions.trim()}>
+           {loading ? 'Creating Task...' : 'Assign Task'}
          </Button>
       </div>
     </form>

@@ -274,7 +274,18 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
     </div>
   );
 
-  const renderMyPosts = () => (
+  const renderMyPosts = () => {
+    const myPosts = posts.filter(post => post.user.name === user.name);
+    const myStats = {
+      total: myPosts.length,
+      pending: myPosts.filter(p => p.status === 'pending').length,
+      assigned: myPosts.filter(p => p.status === 'assigned').length,
+      completed: myPosts.filter(p => p.status === 'completed').length,
+      totalLikes: myPosts.reduce((sum, p) => sum + p.likes, 0),
+      totalComments: myPosts.reduce((sum, p) => sum + p.comments, 0)
+    };
+
+    return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">My Posts</h2>
@@ -282,59 +293,42 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
           <Plus className="h-4 w-4 mr-2" />
           New Post
         </Button>
-        
-        <Button 
-          onClick={() => {
-            const testPost = {
-              id: Date.now(),
-              user: { name: user.name, avatar: '', role: user.role || 'citizen' },
-              content: 'Test post - this is working! #test #working',
-              image: null,
-              video: null,
-              mediaFiles: [],
-              hashtags: ['#test', '#working'],
-              location: 'Test Location',
-              status: 'pending',
-              assignedTo: null,
-              createdAt: 'Just now',
-              likes: 0,
-              comments: 0,
-              shares: 0
-            };
-            addPost(testPost);
-          }}
-          className="bg-green-600 hover:bg-green-700 text-white ml-2"
-        >
-          Test Post
-        </Button>
-        <Button 
-          onClick={() => {
-            const testImagePost = {
-              id: Date.now(),
-              user: { name: user.name, avatar: '', role: user.role || 'citizen' },
-              content: 'Test image post with working URL! #test #image',
-              image: null,
-              video: null,
-              mediaFiles: [{
-                file: null,
-                url: 'https://picsum.photos/400/300?random=' + Date.now(),
-                type: 'image'
-              }],
-              hashtags: ['#test', '#image'],
-              location: 'Test Location',
-              status: 'pending',
-              assignedTo: null,
-              createdAt: 'Just now',
-              likes: 0,
-              comments: 0,
-              shares: 0
-            };
-            addPost(testImagePost);
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white ml-2"
-        >
-          Test Image Post
-        </Button>
+      </div>
+
+      {/* My Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">{myStats.total}</div>
+              <div className="text-sm text-gray-600">Total Posts</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">{myStats.completed}</div>
+              <div className="text-sm text-gray-600">Resolved</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-600">{myStats.totalLikes}</div>
+              <div className="text-sm text-gray-600">Total Likes</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-orange-600">{myStats.totalComments}</div>
+              <div className="text-sm text-gray-600">Comments</div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       
       <div className="grid gap-4">
@@ -381,7 +375,8 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
         ))}
       </div>
     </div>
-  );
+    );
+  };
 
   const renderAssignedIssues = () => (
     <div className="space-y-4">

@@ -24,59 +24,100 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ worker, onLogo
   const [proofDescription, setProofDescription] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Mock assigned tasks for the worker
+  // Fetch tasks from backend
   useEffect(() => {
-    const mockTasks = [
-      {
-        id: 1,
-        title: 'Road Repair - Main Street',
-        description: 'Fix potholes on Main Street between 1st and 2nd Avenue',
-        location: 'Main Street, Downtown',
-        priority: 'high',
-        status: 'assigned',
-        assignedBy: 'Akhilesh (Government Official)',
-        assignedAt: '2025-09-15',
-        dueDate: '2025-09-20',
-        postId: 'post123'
-      },
-      {
-        id: 2,
-        title: 'Street Light Repair',
-        description: 'Replace broken street light on Oak Avenue',
-        location: 'Oak Avenue, Residential Area',
-        priority: 'medium',
-        status: 'assigned',
-        assignedBy: 'Akhilesh (Government Official)',
-        assignedAt: '2025-09-14',
-        dueDate: '2025-09-18',
-        postId: 'post124'
-      }
-    ];
-    setAssignedTasks(mockTasks);
+    fetchTasks();
   }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const token = localStorage.getItem('workerToken') || localStorage.getItem('token');
+      const response = await fetch('https://service-5-backend-production.up.railway.app/api/tasks', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const tasksData = await response.json();
+        console.log('Tasks fetched for worker:', tasksData);
+        
+        // Separate assigned and completed tasks
+        const assigned = tasksData.filter((task: any) => task.status === 'assigned' || task.status === 'in-progress');
+        const completed = tasksData.filter((task: any) => task.status === 'completed' || task.status === 'closed');
+        
+        setAssignedTasks(assigned);
+        setCompletedTasks(completed);
+      } else {
+        console.error('Failed to fetch tasks:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
 
   const handleSubmitProof = async () => {
     setLoading(true);
     try {
-      // Here you would upload the proof to backend
-      console.log('Submitting proof:', {
-        taskId: selectedTask.id,
-        description: proofDescription,
-        image: proofImage,
-        video: proofVideo
+      const token = localStorage.getItem('workerToken') || localStorage.getItem('token');
+      
+      // Upload proof files if any
+      let proofUrls = [];
+      if (proofImage || proofVideo) {
+        const formData = new FormData();
+        if (proofImage) formData.append('files', proofImage);
+        if (proofVideo) formData.append('files', proofVideo);
+        
+        const uploadResponse = await fetch('https://service-5-backend-production.up.railway.app/api/upload/multiple', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData,
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json();
+          proofUrls = uploadData.files.map((file: any) => ({
+            url: `https://service-5-backend-production.up.railway.app${file.fileUrl}`,
+            description: proofDescription,
+            uploadedAt: new Date()
+          }));
+        }
+      }
+
+      // Update task status
+      const response = await fetch(`https://service-5-backend-production.up.railway.app/api/tasks/${selectedTask._id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'completed',
+          workerRemarks: proofDescription,
+          workProof: proofUrls
+        })
       });
 
-      // Move task from assigned to completed
-      setCompletedTasks(prev => [...prev, { ...selectedTask, status: 'completed', proofSubmitted: true }]);
-      setAssignedTasks(prev => prev.filter(task => task.id !== selectedTask.id));
-      
-      setShowProofDialog(false);
-      setSelectedTask(null);
-      setProofImage(null);
-      setProofVideo(null);
-      setProofDescription('');
+      if (response.ok) {
+        // Refresh tasks
+        await fetchTasks();
+        
+        setShowProofDialog(false);
+        setSelectedTask(null);
+        setProofImage(null);
+        setProofVideo(null);
+        setProofDescription('');
+        
+        alert('Task completed successfully!');
+      } else {
+        throw new Error('Failed to update task status');
+      }
     } catch (error) {
       console.error('Error submitting proof:', error);
+      alert('Failed to submit proof. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -175,13 +216,13 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ worker, onLogo
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Assigned Tasks</h2>
           <div className="grid gap-6">
             {assignedTasks.map((task) => (
-              <Card key={task.id}>
+              <Card key={task._id}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-3">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {task.title}
+                          {task.post?.title || 'Task'}
                         </h3>
                         <Badge className={cn("text-xs", getPriorityColor(task.priority))}>
                           {task.priority} priority
@@ -192,22 +233,29 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ worker, onLogo
                         {task.description}
                       </p>
                       
+                      {task.instructions && (
+                        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">Instructions:</p>
+                          <p className="text-sm text-blue-700 dark:text-blue-300">{task.instructions}</p>
+                        </div>
+                      )}
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500 dark:text-gray-400">
                         <div className="flex items-center space-x-2">
                           <MapPin className="h-4 w-4" />
-                          <span>{task.location}</span>
+                          <span>{task.post?.location || 'Location not specified'}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <User className="h-4 w-4" />
-                          <span>Assigned by: {task.assignedBy}</span>
+                          <span>Assigned by: {task.assignedBy?.name || 'Unknown'}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Calendar className="h-4 w-4" />
-                          <span>Due: {task.dueDate}</span>
+                          <span>Created: {new Date(task.createdAt).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Clock className="h-4 w-4" />
-                          <span>Assigned: {task.assignedAt}</span>
+                          <span>Status: {task.status}</span>
                         </div>
                       </div>
                     </div>
@@ -235,16 +283,16 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ worker, onLogo
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Completed Tasks</h2>
             <div className="grid gap-6">
               {completedTasks.map((task) => (
-                <Card key={task.id}>
+                <Card key={task._id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-3">
                           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {task.title}
+                            {task.post?.title || 'Task'}
                           </h3>
-                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                            Completed
+                          <Badge className={task.status === 'closed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}>
+                            {task.status === 'closed' ? 'Closed' : 'Completed'}
                           </Badge>
                         </div>
                         
@@ -252,11 +300,44 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ worker, onLogo
                           {task.description}
                         </p>
                         
+                        {task.workerRemarks && (
+                          <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">Your Remarks:</p>
+                            <p className="text-sm text-green-700 dark:text-green-300">{task.workerRemarks}</p>
+                          </div>
+                        )}
+                        
+                        {task.workProof && task.workProof.length > 0 && (
+                          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">Proof Submitted:</p>
+                            <div className="space-y-2">
+                              {task.workProof.map((proof: any, index: number) => (
+                                <div key={index} className="text-sm text-blue-700 dark:text-blue-300">
+                                  <a href={proof.url} target="_blank" rel="noopener noreferrer" className="underline">
+                                    Proof {index + 1}
+                                  </a>
+                                  {proof.description && <span> - {proof.description}</span>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                           <div className="flex items-center space-x-2">
                             <CheckCircle className="h-4 w-4 text-green-600" />
-                            <span>Proof submitted and pending review</span>
+                            <span>
+                              {task.status === 'closed' 
+                                ? 'Task closed and approved' 
+                                : 'Proof submitted and pending review'
+                              }
+                            </span>
                           </div>
+                          {task.completionDate && (
+                            <div className="mt-1">
+                              Completed: {new Date(task.completionDate).toLocaleDateString()}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -278,12 +359,21 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ worker, onLogo
           {selectedTask && (
             <div className="space-y-6">
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <h3 className="font-semibold mb-2">{selectedTask.title}</h3>
+                <h3 className="font-semibold mb-2">{selectedTask.post?.title || 'Task'}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   {selectedTask.description}
                 </p>
+                {selectedTask.instructions && (
+                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded">
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">Instructions:</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">{selectedTask.instructions}</p>
+                  </div>
+                )}
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  Location: {selectedTask.location}
+                  Location: {selectedTask.post?.location || 'Location not specified'}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Priority: {selectedTask.priority}
                 </p>
               </div>
               
