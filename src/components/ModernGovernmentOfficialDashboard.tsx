@@ -218,6 +218,50 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                 ))}
               </div>
               
+              {/* Assignment Details */}
+              {post.status === 'assigned' && post.assignedTo && (
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <UserPlus className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Assignment Details</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Assigned to:</span>
+                      <span className="ml-2 font-medium text-blue-800 dark:text-blue-200">
+                        {typeof post.assignedTo === 'string' ? post.assignedTo : post.assignedTo.name || 'Unknown'}
+                      </span>
+                    </div>
+                    {post.assignedBy && (
+                      <div>
+                        <span className="text-muted-foreground">Assigned by:</span>
+                        <span className="ml-2 font-medium text-blue-800 dark:text-blue-200">{post.assignedBy}</span>
+                      </div>
+                    )}
+                    {post.assignedAt && (
+                      <div>
+                        <span className="text-muted-foreground">Assigned on:</span>
+                        <span className="ml-2 font-medium text-blue-800 dark:text-blue-200">
+                          {new Date(post.assignedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {post.priority && (
+                      <div>
+                        <span className="text-muted-foreground">Priority:</span>
+                        <span className="ml-2 font-medium text-blue-800 dark:text-blue-200 capitalize">{post.priority}</span>
+                      </div>
+                    )}
+                  </div>
+                  {post.notes && (
+                    <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
+                      <span className="text-muted-foreground text-sm">Notes:</span>
+                      <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">{post.notes}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
                   <Button 
@@ -328,6 +372,44 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                     <MapPin className="h-3 w-3" />
                     <span>{post.location}</span>
                   </div>
+                  
+                  {/* Assignment Details for Assign Tasks view */}
+                  {post.status === 'assigned' && post.assignedTo && (
+                    <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <UserPlus className="h-3 w-3 text-blue-600" />
+                        <span className="text-xs font-medium text-blue-800 dark:text-blue-200">Assignment Details</span>
+                      </div>
+                      <div className="text-xs space-y-1">
+                        <div>
+                          <span className="text-muted-foreground">Assigned to:</span>
+                          <span className="ml-1 font-medium text-blue-800 dark:text-blue-200">
+                            {typeof post.assignedTo === 'string' ? post.assignedTo : post.assignedTo.name || 'Unknown'}
+                          </span>
+                        </div>
+                        {post.assignedBy && (
+                          <div>
+                            <span className="text-muted-foreground">Assigned by:</span>
+                            <span className="ml-1 font-medium text-blue-800 dark:text-blue-200">{post.assignedBy}</span>
+                          </div>
+                        )}
+                        {post.assignedAt && (
+                          <div>
+                            <span className="text-muted-foreground">Assigned on:</span>
+                            <span className="ml-1 font-medium text-blue-800 dark:text-blue-200">
+                              {new Date(post.assignedAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
+                        {post.notes && (
+                          <div>
+                            <span className="text-muted-foreground">Notes:</span>
+                            <span className="ml-1 text-blue-800 dark:text-blue-200">{post.notes}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -508,6 +590,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
               workers={workers}
               onClose={() => setShowAssignDialog(false)}
               onUpdatePost={updatePost}
+              user={user}
             />
           )}
         </DialogContent>
@@ -562,22 +645,27 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
 };
 
 // Assign Worker Form Component
-const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => void; onUpdatePost: (id: number, updates: any) => void }> = ({ post, workers, onClose, onUpdatePost }) => {
+const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => void; onUpdatePost: (id: number, updates: any) => void; user: any }> = ({ post, workers, onClose, onUpdatePost, user }) => {
   const [selectedWorker, setSelectedWorker] = useState('none');
   const [priority, setPriority] = useState(post.priority);
   const [notes, setNotes] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedWorkerData = workers.find(w => w.id === selectedWorker);
-    onUpdatePost(post.id, {
+    const selectedWorkerData = workers.find(w => w.id.toString() === selectedWorker);
+    const assignmentDetails = {
       status: 'assigned',
       assignedTo: selectedWorkerData?.name,
       assignedWorker: selectedWorker,
+      assignedWorkerId: selectedWorker,
+      assignedBy: user.name,
+      assignedByRole: user.role,
+      assignedAt: new Date().toISOString(),
       priority: priority,
       notes: notes
-    });
-    console.log('Assigning worker:', { post: post.id, worker: selectedWorker, priority, notes });
+    };
+    onUpdatePost(post.id, assignmentDetails);
+    console.log('Assigning worker:', { post: post.id, assignmentDetails });
     onClose();
   };
 
