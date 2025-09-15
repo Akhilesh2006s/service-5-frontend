@@ -27,7 +27,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedHashtag, setSelectedHashtag] = useState('all');
   const [showCreatePost, setShowCreatePost] = useState(false);
-  const { posts, addPost, deletePost, savePostsToLocalStorage } = usePosts();
+  const { posts, addPost, deletePost, likePost, addComment, savePostsToLocalStorage } = usePosts();
 
   // Debug user object
   console.log('CitizenDashboard user object:', user);
@@ -237,11 +237,26 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
-                  <Button variant="ghost" size="sm" className="text-muted-foreground">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-muted-foreground hover:text-red-500"
+                    onClick={() => likePost(post.id)}
+                  >
                     <Heart className="h-4 w-4 mr-2" />
                     {post.likes}
                   </Button>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-muted-foreground hover:text-blue-500"
+                    onClick={() => {
+                      const comment = prompt('Add a comment:');
+                      if (comment && comment.trim()) {
+                        addComment(post.id, comment.trim());
+                      }
+                    }}
+                  >
                     <MessageCircle className="h-4 w-4 mr-2" />
                     {post.comments}
                   </Button>

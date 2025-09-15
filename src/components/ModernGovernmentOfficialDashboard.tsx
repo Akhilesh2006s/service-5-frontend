@@ -28,7 +28,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [selectedPost, setSelectedPost] = useState<any>(null);
-  const { posts, updatePost } = usePosts();
+  const { posts, updatePost, likePost, addComment } = usePosts();
 
   const mockWorkers = [
     { id: 1, name: 'Mike Johnson', department: 'Road Maintenance', status: 'available', avatar: '' },
@@ -185,11 +185,24 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
-                  <Button variant="ghost" size="sm" className="text-muted-foreground">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-muted-foreground hover:text-red-500"
+                    onClick={() => likePost(post.id)}
+                  >
                     <Heart className="h-4 w-4 mr-2" />
                     {post.likes}
                   </Button>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-muted-foreground hover:text-blue-500"
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setShowCommentDialog(true);
+                    }}
+                  >
                     <MessageCircle className="h-4 w-4 mr-2" />
                     {post.comments}
                   </Button>
@@ -427,7 +440,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
             <AddCommentForm 
               post={selectedPost}
               onClose={() => setShowCommentDialog(false)}
-              onUpdatePost={updatePost}
+              onAddComment={addComment}
             />
           )}
         </DialogContent>
@@ -582,21 +595,12 @@ const UpdateStatusForm: React.FC<{ post: any; onClose: () => void; onUpdatePost:
 };
 
 // Add Comment Form Component
-const AddCommentForm: React.FC<{ post: any; onClose: () => void; onUpdatePost: (id: number, updates: any) => void }> = ({ post, onClose, onUpdatePost }) => {
+const AddCommentForm: React.FC<{ post: any; onClose: () => void; onAddComment: (id: number, text: string) => void }> = ({ post, onClose, onAddComment }) => {
   const [comment, setComment] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newComment = {
-      id: Date.now(),
-      text: comment,
-      author: 'Government Official',
-      createdAt: new Date().toISOString()
-    };
-    
-    onUpdatePost(post.id, {
-      comments: [...(post.comments || []), newComment]
-    });
+    onAddComment(post.id, comment);
     console.log('Adding comment:', { post: post.id, comment });
     onClose();
   };

@@ -36,6 +36,8 @@ interface PostsContextType {
   addPost: (post: Post) => void;
   updatePost: (id: number, updates: Partial<Post>) => void;
   deletePost: (id: number) => void;
+  likePost: (id: number) => void;
+  addComment: (id: number, text: string) => void;
   loading: boolean;
   error: string | null;
   refreshPosts: () => Promise<void>;
@@ -382,6 +384,8 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
   };
 
   const updatePost = async (id: number, updates: Partial<Post>) => {
+    console.log('Updating post:', id, 'with updates:', updates);
+    
     if (!token) {
       // If no token, just update local state
       setPosts(prevPosts => 
@@ -394,7 +398,7 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
 
     try {
       const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -403,9 +407,15 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       });
 
       if (response.ok) {
+        const updatedPost = await response.json();
+        console.log('Backend updated post:', updatedPost);
+        
+        // Convert backend post to frontend format
+        const convertedPost = convertBackendPost(updatedPost);
+        
         setPosts(prevPosts => 
           prevPosts.map(post => 
-            post.id === id ? { ...post, ...updates } : post
+            post.id === id ? convertedPost : post
           )
         );
       } else {
@@ -417,6 +427,123 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       setPosts(prevPosts => 
         prevPosts.map(post => 
           post.id === id ? { ...post, ...updates } : post
+        )
+      );
+    }
+  };
+
+  const likePost = async (id: number) => {
+    console.log('Liking post:', id);
+    
+    if (!token) {
+      // If no token, just update local state
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === id ? { ...post, likes: (post.likes || 0) + 1 } : post
+        )
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/posts/${id}/upvote`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Like result:', result);
+        
+        setPosts(prevPosts => 
+          prevPosts.map(post => 
+            post.id === id ? { ...post, likes: result.upvoteCount } : post
+          )
+        );
+      } else {
+        throw new Error('Failed to like post');
+      }
+    } catch (err) {
+      console.error('Error liking post:', err);
+      // Fallback to local state
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === id ? { ...post, likes: (post.likes || 0) + 1 } : post
+        )
+      );
+    }
+  };
+
+  const addComment = async (id: number, text: string) => {
+    console.log('Adding comment to post:', id, 'text:', text);
+    
+    if (!token) {
+      // If no token, just update local state
+      const newComment = {
+        id: Date.now(),
+        text,
+        author: 'Anonymous',
+        createdAt: new Date().toISOString()
+      };
+      
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === id ? { 
+            ...post, 
+            comments: [...(post.comments || []), newComment],
+            comments: (post.comments || 0) + 1
+          } : post
+        )
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/posts/${id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text })
+      });
+
+      if (response.ok) {
+        const newComment = await response.json();
+        console.log('Comment added:', newComment);
+        
+        setPosts(prevPosts => 
+          prevPosts.map(post => 
+            post.id === id ? { 
+              ...post, 
+              comments: [...(post.comments || []), newComment],
+              comments: (post.comments || 0) + 1
+            } : post
+          )
+        );
+      } else {
+        throw new Error('Failed to add comment');
+      }
+    } catch (err) {
+      console.error('Error adding comment:', err);
+      // Fallback to local state
+      const newComment = {
+        id: Date.now(),
+        text,
+        author: 'Anonymous',
+        createdAt: new Date().toISOString()
+      };
+      
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === id ? { 
+            ...post, 
+            comments: [...(post.comments || []), newComment],
+            comments: (post.comments || 0) + 1
+          } : post
         )
       );
     }
@@ -515,6 +642,8 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       addPost, 
       updatePost, 
       deletePost, 
+      likePost,
+      addComment,
       loading, 
       error, 
       refreshPosts,
