@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { FileUpload } from './FileUpload';
 import { usePosts } from '@/contexts/PostsContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CitizenDashboardProps {
   user: any;
@@ -385,50 +386,129 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
   const [hashtags, setHashtags] = useState('');
   const [location, setLocation] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { token } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Extract hashtags from content and hashtags field
-    const allHashtags = [...new Set([
-      ...content.match(/#\w+/g) || [],
-      ...hashtags.split(' ').filter(tag => tag.startsWith('#'))
-    ])];
+    if (!content.trim() || !location.trim()) {
+      alert('Please fill in content and location');
+      return;
+    }
 
-    // Create new post object
-    const newPost = {
-      id: Date.now(), // Simple ID generation
-      user: { 
-        name: user.name, 
-        avatar: user.avatar || '', 
-        role: user.role || 'citizen' 
-      },
-      content: content,
-      image: selectedFiles.find(file => file.type.startsWith('image/')) ? URL.createObjectURL(selectedFiles.find(file => file.type.startsWith('image/'))!) : null,
-      video: selectedFiles.find(file => file.type.startsWith('video/')) ? URL.createObjectURL(selectedFiles.find(file => file.type.startsWith('video/'))!) : null,
-      mediaFiles: selectedFiles.map(file => ({
-        file: file,
-        url: URL.createObjectURL(file),
-        type: file.type.startsWith('image/') ? 'image' : 'video'
-      })),
-      hashtags: allHashtags,
-      location: location,
-      status: 'pending',
-      assignedTo: null,
-      createdAt: 'Just now',
-      likes: 0,
-      comments: 0,
-      shares: 0
-    };
-
-    console.log('Creating post:', newPost);
-    onPostCreated(newPost);
+    setLoading(true);
     
-    // Reset form
-    setContent('');
-    setHashtags('');
-    setLocation('');
-    setSelectedFiles([]);
+    try {
+      // Extract hashtags from content and hashtags field
+      const allHashtags = [...new Set([
+        ...content.match(/#\w+/g) || [],
+        ...hashtags.split(' ').filter(tag => tag.startsWith('#'))
+      ])];
+
+      // Prepare data for backend (using title and description as required by backend)
+      const postData = {
+        title: content.substring(0, 100), // Use first 100 chars as title
+        description: content,
+        category: 'other', // Default category
+        priority: 'medium',
+        location: location,
+        department: 'general',
+        images: [], // Will handle file uploads later
+        videos: []
+      };
+
+      console.log('Sending post to backend:', postData);
+
+      if (token) {
+        // Send to backend
+        const response = await fetch('https://service-5-backend-production.up.railway.app/api/posts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(postData),
+        });
+
+        if (response.ok) {
+          const backendPost = await response.json();
+          console.log('Backend response:', backendPost);
+          
+          // Convert backend post to frontend format
+          const newPost = {
+            id: backendPost._id,
+            user: { 
+              name: backendPost.author?.name || user.name, 
+              avatar: user.avatar || '', 
+              role: backendPost.author?.role || user.role || 'citizen' 
+            },
+            content: backendPost.description,
+            image: null,
+            video: null,
+            mediaFiles: [
+              ...backendPost.images.map((url: string) => ({ file: null, url, type: 'image' })),
+              ...backendPost.videos.map((url: string) => ({ file: null, url, type: 'video' }))
+            ],
+            hashtags: allHashtags,
+            location: backendPost.location,
+            status: backendPost.status,
+            assignedTo: backendPost.assignedTo?.name || null,
+            createdAt: 'Just now',
+            likes: backendPost.upvotes?.length || 0,
+            comments: backendPost.comments?.length || 0,
+            shares: 0
+          };
+
+          console.log('Converted post for frontend:', newPost);
+          onPostCreated(newPost);
+        } else {
+          const error = await response.json();
+          console.error('Backend error:', error);
+          throw new Error(error.message || 'Failed to create post');
+        }
+      } else {
+        // Fallback for unauthenticated users
+        const newPost = {
+          id: Date.now(),
+          user: { 
+            name: user.name, 
+            avatar: user.avatar || '', 
+            role: user.role || 'citizen' 
+          },
+          content: content,
+          image: selectedFiles.find(file => file.type.startsWith('image/')) ? URL.createObjectURL(selectedFiles.find(file => file.type.startsWith('image/'))!) : null,
+          video: selectedFiles.find(file => file.type.startsWith('video/')) ? URL.createObjectURL(selectedFiles.find(file => file.type.startsWith('video/'))!) : null,
+          mediaFiles: selectedFiles.map(file => ({
+            file: file,
+            url: URL.createObjectURL(file),
+            type: file.type.startsWith('image/') ? 'image' : 'video'
+          })),
+          hashtags: allHashtags,
+          location: location,
+          status: 'pending',
+          assignedTo: null,
+          createdAt: 'Just now',
+          likes: 0,
+          comments: 0,
+          shares: 0
+        };
+
+        console.log('Creating local post (no auth):', newPost);
+        onPostCreated(newPost);
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+      alert('Failed to create post. Please try again.');
+    } finally {
+      setLoading(false);
+      
+      // Reset form
+      setContent('');
+      setHashtags('');
+      setLocation('');
+      setSelectedFiles([]);
+    }
   };
 
   return (
@@ -484,8 +564,8 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={!content.trim()}>
-          Post Issue
+        <Button type="submit" disabled={!content.trim() || loading}>
+          {loading ? 'Posting...' : 'Post Issue'}
         </Button>
       </div>
     </form>

@@ -327,62 +327,13 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
   }, [posts, token]);
 
   const addPost = async (post: Post) => {
-    console.log('Adding new post:', post);
-    if (!token) {
-      // If no token, just add to local state
-      setPosts(prevPosts => {
-        const newPosts = [post, ...prevPosts];
-        console.log('Adding post to local state, new posts:', newPosts);
-        return newPosts;
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/posts`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          title: post.content.substring(0, 100),
-          description: post.content,
-          category: 'general',
-          priority: post.priority || 'medium',
-          status: post.status || 'pending',
-          location: post.location,
-          department: 'General',
-          hashtags: post.hashtags,
-          image: post.image,
-          video: post.video
-        })
-      });
-
-      if (response.ok) {
-        const newBackendPost = await response.json();
-        console.log('Backend created post:', newBackendPost);
-        const convertedPost = convertBackendPost(newBackendPost);
-        console.log('Converted post:', convertedPost);
-        setPosts(prevPosts => {
-          const newPosts = [convertedPost, ...prevPosts];
-          console.log('Added post to state, new posts:', newPosts);
-          return newPosts;
-        });
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Backend error:', errorData);
-        throw new Error(errorData.message || 'Failed to create post');
-      }
-    } catch (err) {
-      console.error('Error creating post:', err);
-      // Fallback to local state
-      setPosts(prevPosts => {
-        const newPosts = [post, ...prevPosts];
-        console.log('Fallback: Adding post to local state:', newPosts);
-        return newPosts;
-      });
-    }
+    console.log('Adding new post to local state:', post);
+    // Just add to local state - the CreatePostForm handles backend calls
+    setPosts(prevPosts => {
+      const newPosts = [post, ...prevPosts];
+      console.log('Added post to local state, total posts:', newPosts.length);
+      return newPosts;
+    });
   };
 
   const updatePost = async (id: number, updates: Partial<Post>) => {
