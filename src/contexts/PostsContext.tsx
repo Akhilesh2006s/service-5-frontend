@@ -78,6 +78,7 @@ const convertBackendPost = (backendPost: any): Post => {
   const mediaFiles: any[] = [];
   
   console.log('Converting backend post:', backendPost._id, 'images:', backendPost.images, 'videos:', backendPost.videos);
+  console.log('Post title:', backendPost.title);
   
   // Add images
   if (backendPost.images && Array.isArray(backendPost.images)) {
@@ -203,6 +204,7 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
         console.log('Backend posts received:', backendPosts);
         const convertedPosts = backendPosts.map(convertBackendPost);
         console.log('Converted posts:', convertedPosts);
+        console.log('Posts with media:', convertedPosts.filter(p => p.mediaFiles && p.mediaFiles.length > 0));
         
         // Filter out deleted posts
         try {

@@ -164,6 +164,20 @@ export const MediaTestComponent: React.FC = () => {
             <Button onClick={createTestPostWithBase64} disabled={loading}>
               {loading ? 'Creating...' : 'Create Test Post with Base64'}
             </Button>
+            <Button onClick={() => {
+              // Test the fallback system directly
+              const testMedia = {
+                url: 'https://service-5-backend-production.up.railway.app/uploads/nonexistent-file.png',
+                type: 'image',
+                base64Data: null,
+                isRailwayUpload: true,
+                fallbackImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBhdmFpbGFibGU8L3RleHQ+PC9zdmc+'
+              };
+              console.log('Test media object:', testMedia);
+              alert('Check console for test media object');
+            }}>
+              Test Fallback Object
+            </Button>
           </div>
 
           {testResults.length > 0 && (
