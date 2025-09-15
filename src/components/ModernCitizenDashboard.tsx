@@ -94,7 +94,11 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
 
       {/* Posts Feed */}
       <div className="space-y-4">
-        {posts.map((post) => (
+        {posts.map((post) => {
+          console.log('Rendering post:', post);
+          console.log('Post mediaFiles:', post.mediaFiles);
+          console.log('Post image:', post.image);
+          return (
           <Card key={post.id} className="overflow-hidden">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -127,7 +131,10 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
               {/* Display all media files */}
               {post.mediaFiles && post.mediaFiles.length > 0 && (
                 <div className="mb-4 space-y-2">
-                  {post.mediaFiles.map((media, index) => (
+                  {console.log('Rendering mediaFiles:', post.mediaFiles)}
+                  {post.mediaFiles.map((media, index) => {
+                    console.log('Rendering media:', media);
+                    return (
                     <div key={index} className="rounded-lg overflow-hidden">
                       {media.type === 'image' ? (
                         <img 
@@ -154,13 +161,15 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                         </video>
                       )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
               
               {/* Fallback for old posts with single image */}
               {!post.mediaFiles && post.image && (
                 <div className="mb-4 rounded-lg overflow-hidden">
+                  {console.log('Rendering fallback image:', post.image)}
                   <img 
                     src={post.image} 
                     alt="Post" 
@@ -206,7 +215,8 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
               </div>
             </CardContent>
           </Card>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
