@@ -92,7 +92,14 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
         {posts.map((post) => {
           console.log('Government Dashboard - Rendering post:', post);
           console.log('Post mediaFiles:', post.mediaFiles);
+          console.log('Post mediaFiles length:', post.mediaFiles?.length);
           console.log('Post image:', post.image);
+          console.log('Post video:', post.video);
+          console.log('Post has mediaFiles?', !!post.mediaFiles);
+          console.log('Post mediaFiles is array?', Array.isArray(post.mediaFiles));
+          if (post.mediaFiles && post.mediaFiles.length > 0) {
+            console.log('First mediaFile:', post.mediaFiles[0]);
+          }
           return (
           <Card key={post.id} className="overflow-hidden">
             <CardHeader className="pb-3">
@@ -129,15 +136,23 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
               <p className="mb-4">{post.content}</p>
               
               {/* Render media files */}
-              {post.mediaFiles && post.mediaFiles.length > 0 && (
+              {(() => {
+                console.log('Checking media rendering for post:', post.id);
+                console.log('post.mediaFiles:', post.mediaFiles);
+                console.log('post.mediaFiles && post.mediaFiles.length > 0:', post.mediaFiles && post.mediaFiles.length > 0);
+                return post.mediaFiles && post.mediaFiles.length > 0;
+              })() && (
                 <div className="mb-4 space-y-2">
-                  {post.mediaFiles.map((media: any, index: number) => (
+                  {post.mediaFiles.map((media: any, index: number) => {
+                    console.log('Rendering media:', index, media);
+                    return (
                     <div key={index} className="rounded-lg overflow-hidden">
                       {media.type === 'image' ? (
                         <img 
                           src={media.url} 
                           alt={`Post media ${index + 1}`} 
                           className="w-full h-64 object-cover"
+                          onLoad={() => console.log('Image loaded successfully:', media.url)}
                           onError={(e) => {
                             console.error('Error loading image:', media.url);
                             (e.target as HTMLImageElement).style.display = 'none';
@@ -148,24 +163,35 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                           src={media.url} 
                           className="w-full h-64 object-cover"
                           controls
+                          onLoadStart={() => console.log('Video loading started:', media.url)}
                           onError={(e) => {
                             console.error('Error loading video:', media.url);
                             (e.target as HTMLVideoElement).style.display = 'none';
                           }}
                         />
-                      ) : null}
+                      ) : (
+                        <div>Unknown media type: {media.type}</div>
+                      )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
               
               {/* Fallback for old image format */}
-              {post.image && !post.mediaFiles && (
+              {(() => {
+                console.log('Checking fallback image for post:', post.id);
+                console.log('post.image:', post.image);
+                console.log('!post.mediaFiles:', !post.mediaFiles);
+                console.log('post.image && !post.mediaFiles:', post.image && !post.mediaFiles);
+                return post.image && !post.mediaFiles;
+              })() && (
                 <div className="mb-4 rounded-lg overflow-hidden">
                   <img 
                     src={post.image} 
                     alt="Post" 
                     className="w-full h-64 object-cover"
+                    onLoad={() => console.log('Fallback image loaded successfully:', post.image)}
                     onError={(e) => {
                       console.error('Error loading fallback image:', post.image);
                       (e.target as HTMLImageElement).style.display = 'none';

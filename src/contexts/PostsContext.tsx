@@ -77,10 +77,14 @@ const convertBackendPost = (backendPost: any): Post => {
   // Convert backend images/videos arrays to frontend mediaFiles format
   const mediaFiles: any[] = [];
   
+  console.log('Converting backend post:', backendPost._id, 'images:', backendPost.images, 'videos:', backendPost.videos);
+  
   // Add images
   if (backendPost.images && Array.isArray(backendPost.images)) {
+    console.log('Processing images array:', backendPost.images);
     backendPost.images.forEach((imageUrl: string) => {
       if (imageUrl) {
+        console.log('Adding image to mediaFiles:', imageUrl);
         mediaFiles.push({
           file: null,
           url: imageUrl,
@@ -92,8 +96,10 @@ const convertBackendPost = (backendPost: any): Post => {
   
   // Add videos
   if (backendPost.videos && Array.isArray(backendPost.videos)) {
+    console.log('Processing videos array:', backendPost.videos);
     backendPost.videos.forEach((videoUrl: string) => {
       if (videoUrl) {
+        console.log('Adding video to mediaFiles:', videoUrl);
         mediaFiles.push({
           file: null,
           url: videoUrl,
@@ -102,6 +108,8 @@ const convertBackendPost = (backendPost: any): Post => {
       }
     });
   }
+  
+  console.log('Final mediaFiles array:', mediaFiles);
 
   // Fallback to single image/video if mediaFiles doesn't exist
   let singleImage = null;
