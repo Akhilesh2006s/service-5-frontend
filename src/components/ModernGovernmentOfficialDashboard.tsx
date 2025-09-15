@@ -158,6 +158,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
       if (token && token.startsWith('local_')) {
         // Use context workers for local users
         console.log('Using context workers:', contextWorkers);
+        console.log('Context workers length:', contextWorkers.length);
         setWorkers(contextWorkers);
         setWorkersLoading(false);
         return;
@@ -175,8 +176,10 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
         const workersData = await response.json();
         setWorkers(workersData);
         console.log('Workers fetched from backend:', workersData);
+        console.log('Backend workers length:', workersData.length);
       } else {
         console.error('Failed to fetch workers:', response.status);
+        console.error('Response status text:', response.statusText);
       }
     } catch (error) {
       console.error('Error fetching workers:', error);
@@ -1032,12 +1035,16 @@ const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => voi
   };
 
   const availableWorkers = workers.filter(worker => 
-    worker.status === 'available'
+    worker.status === 'available' || worker.status === 'active'
   );
 
   console.log('AssignWorkerForm - workers:', workers);
   console.log('AssignWorkerForm - availableWorkers:', availableWorkers);
   console.log('AssignWorkerForm - post:', post);
+  console.log('AssignWorkerForm - workers count:', workers.length);
+  console.log('AssignWorkerForm - availableWorkers count:', availableWorkers.length);
+  console.log('AssignWorkerForm - workers length:', workers.length);
+  console.log('AssignWorkerForm - availableWorkers length:', availableWorkers.length);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

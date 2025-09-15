@@ -9,7 +9,7 @@ interface User {
   designation?: string;
   phone?: string;
   avatar?: string;
-  status?: 'active' | 'inactive';
+  status?: 'active' | 'inactive' | 'available' | 'busy';
   verified?: boolean;
   createdAt?: string;
   postsAssigned?: number;
@@ -66,7 +66,14 @@ const loadUsersFromStorage = (): { governmentOfficials: User[], workers: User[] 
       }
     ];
     
-    const workers = storedWorkers ? JSON.parse(storedWorkers) : [
+    const workers = storedWorkers ? (() => {
+      const parsedWorkers = JSON.parse(storedWorkers);
+      // Migrate 'active' status to 'available' for workers
+      return parsedWorkers.map((worker: User) => ({
+        ...worker,
+        status: worker.status === 'active' ? 'available' : worker.status
+      }));
+    })() : [
       {
         id: 1,
         name: 'Mike Davis',
@@ -76,7 +83,7 @@ const loadUsersFromStorage = (): { governmentOfficials: User[], workers: User[] 
         designation: 'Field Supervisor',
         phone: '+1-555-0201',
         avatar: '',
-        status: 'active' as const,
+        status: 'available' as const,
         verified: true,
         createdAt: '2024-02-10',
         postsAssigned: 0,
@@ -91,7 +98,7 @@ const loadUsersFromStorage = (): { governmentOfficials: User[], workers: User[] 
         designation: 'Maintenance Worker',
         phone: '+1-555-0202',
         avatar: '',
-        status: 'active' as const,
+        status: 'available' as const,
         verified: true,
         createdAt: '2024-04-05',
         postsAssigned: 0,
@@ -161,7 +168,7 @@ export const UsersProvider: React.FC<UsersProviderProps> = ({ children }) => {
       ...worker,
       id: Date.now(), // Simple ID generation
       role: 'worker' as const,
-      status: 'active' as const,
+      status: 'available' as const,
       verified: true,
       createdAt: new Date().toISOString().split('T')[0],
       postsAssigned: 0,
