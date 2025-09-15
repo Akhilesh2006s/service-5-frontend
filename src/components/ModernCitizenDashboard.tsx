@@ -168,18 +168,6 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                 </div>
               )}
               
-              {/* Test image to verify rendering works */}
-              <div className="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
-                <p className="text-sm text-yellow-800 mb-2">Test Image (should always show):</p>
-                <img 
-                  src="https://via.placeholder.com/400x200/4F46E5/FFFFFF?text=Test+Image" 
-                  alt="Test" 
-                  className="w-full h-32 object-cover rounded"
-                  onLoad={() => console.log('Test image loaded successfully')}
-                  onError={(e) => console.error('Test image failed to load')}
-                />
-              </div>
-              
               {/* Fallback for old posts with single image */}
               {!post.mediaFiles && post.image && (
                 <div className="mb-4 rounded-lg overflow-hidden">

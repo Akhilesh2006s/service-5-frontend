@@ -85,7 +85,10 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
       </div>
 
       <div className="grid gap-4">
-        {posts.map((post) => (
+        {console.log('Government Dashboard - Posts:', posts)}
+        {posts.map((post) => {
+          console.log('Government Dashboard - Rendering post:', post);
+          return (
           <Card key={post.id} className="overflow-hidden">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -165,7 +168,8 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
               </div>
             </CardContent>
           </Card>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
