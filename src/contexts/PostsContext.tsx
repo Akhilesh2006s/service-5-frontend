@@ -589,8 +589,25 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
           
           return newPosts;
         });
+      } else if (response.status === 404) {
+        // Post doesn't exist on backend, just remove from local state
+        console.log('Post not found on backend (404), removing from local state only');
+        setPosts(prevPosts => {
+          const newPosts = prevPosts.filter(post => post.id !== id);
+          console.log('Removed post from local state (post not found on backend)');
+          
+          // Update localStorage
+          try {
+            localStorage.setItem('local-gov-posts', JSON.stringify(newPosts));
+            console.log('Updated localStorage after 404 deletion');
+          } catch (error) {
+            console.error('Error updating localStorage after 404:', error);
+          }
+          
+          return newPosts;
+        });
       } else {
-        throw new Error('Failed to delete post');
+        throw new Error(`Failed to delete post: ${response.status} ${response.statusText}`);
       }
     } catch (err) {
       console.error('Error deleting post:', err);
