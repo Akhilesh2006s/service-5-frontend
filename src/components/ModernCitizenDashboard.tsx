@@ -478,29 +478,63 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
         ...hashtags.split(' ').filter(tag => tag.startsWith('#'))
       ])];
 
-      // Use actual uploaded files
+      // Upload files to backend first
       let imageUrls = [];
       let videoUrls = [];
       
-      // Add actual file URLs if files are selected
       if (selectedFiles.length > 0) {
-        console.log('Processing selected files:', selectedFiles);
-        selectedFiles.forEach(file => {
-          console.log('Processing file:', file.name, file.type);
-          if (file.type.startsWith('image/')) {
-            // Use the actual file URL
-            const fileUrl = URL.createObjectURL(file);
-            imageUrls.push(fileUrl);
-            console.log('Added image URL:', fileUrl);
-          } else if (file.type.startsWith('video/')) {
-            // Use the actual file URL
-            const fileUrl = URL.createObjectURL(file);
-            videoUrls.push(fileUrl);
-            console.log('Added video URL:', fileUrl);
+        console.log('Uploading files to backend:', selectedFiles);
+        try {
+          const formData = new FormData();
+          selectedFiles.forEach(file => {
+            formData.append('files', file);
+          });
+
+          const uploadResponse = await fetch('https://service-5-backend-production.up.railway.app/api/upload/multiple', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+          });
+
+          if (uploadResponse.ok) {
+            const uploadData = await uploadResponse.json();
+            console.log('Files uploaded successfully:', uploadData);
+            
+            // Separate images and videos
+            uploadData.files.forEach((file: any) => {
+              const fullUrl = `https://service-5-backend-production.up.railway.app${file.fileUrl}`;
+              if (file.mimetype.startsWith('image/')) {
+                imageUrls.push(fullUrl);
+              } else if (file.mimetype.startsWith('video/')) {
+                videoUrls.push(fullUrl);
+              }
+            });
+            console.log('Uploaded imageUrls:', imageUrls);
+            console.log('Uploaded videoUrls:', videoUrls);
+          } else {
+            console.warn('File upload failed, using local URLs as fallback');
+            // Fallback to local URLs
+            selectedFiles.forEach(file => {
+              if (file.type.startsWith('image/')) {
+                imageUrls.push(URL.createObjectURL(file));
+              } else if (file.type.startsWith('video/')) {
+                videoUrls.push(URL.createObjectURL(file));
+              }
+            });
           }
-        });
-        console.log('Final imageUrls:', imageUrls);
-        console.log('Final videoUrls:', videoUrls);
+        } catch (error) {
+          console.warn('File upload error, using local URLs as fallback:', error);
+          // Fallback to local URLs
+          selectedFiles.forEach(file => {
+            if (file.type.startsWith('image/')) {
+              imageUrls.push(URL.createObjectURL(file));
+            } else if (file.type.startsWith('video/')) {
+              videoUrls.push(URL.createObjectURL(file));
+            }
+          });
+        }
       }
 
       // Prepare data for backend (using title and description as required by backend)
@@ -576,15 +610,21 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
           content: content,
           image: null,
           video: null,
-          mediaFiles: selectedFiles.map(file => {
-            const fileUrl = URL.createObjectURL(file);
-            console.log('Creating mediaFile for unauthenticated user:', file.name, fileUrl);
-            return {
-              file: file,
-              url: fileUrl,
-              type: file.type.startsWith('image/') ? 'image' : 'video'
-            };
-          }),
+          mediaFiles: await Promise.all(selectedFiles.map(async (file) => {
+            // For unauthenticated users, convert to base64 for persistence
+            return new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                console.log('Created base64 mediaFile for unauthenticated user:', file.name);
+                resolve({
+                  file: file,
+                  url: reader.result as string,
+                  type: file.type.startsWith('image/') ? 'image' : 'video'
+                });
+              };
+              reader.readAsDataURL(file);
+            });
+          })),
           hashtags: allHashtags,
           location: location,
           status: 'pending',
