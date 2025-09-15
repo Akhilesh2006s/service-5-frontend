@@ -429,7 +429,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
 
       {/* Create Post Dialog - Available on all pages */}
       <Dialog open={showCreatePost} onOpenChange={setShowCreatePost}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Report a Problem</DialogTitle>
           </DialogHeader>
@@ -613,7 +613,7 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
       <div className="flex items-center space-x-3">
         <Avatar className="h-10 w-10">
           <AvatarImage src={user.avatar} alt={user.name} />
@@ -629,7 +629,7 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
         placeholder="Describe the problem you're facing..."
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        className="min-h-32"
+        className="min-h-24"
       />
       
       <div className="grid grid-cols-2 gap-4">
@@ -662,7 +662,7 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
         
         {/* Preview selected files */}
         {selectedFiles.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-3">
             <p className="text-sm font-medium mb-2">Preview:</p>
             <div className="grid grid-cols-2 gap-2">
               {selectedFiles.map((file, index) => (
@@ -671,12 +671,12 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
                     <img 
                       src={URL.createObjectURL(file)} 
                       alt={file.name}
-                      className="w-full h-32 object-cover rounded"
+                      className="w-full h-24 object-cover rounded"
                     />
                   ) : file.type.startsWith('video/') ? (
                     <video 
                       src={URL.createObjectURL(file)} 
-                      className="w-full h-32 object-cover rounded"
+                      className="w-full h-24 object-cover rounded"
                       controls
                     />
                   ) : null}
