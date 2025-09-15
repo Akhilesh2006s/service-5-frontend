@@ -811,21 +811,23 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
 
       {/* Assign Worker Dialog */}
       <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Assign Worker</DialogTitle>
           </DialogHeader>
-          {selectedPost && (
-            <AssignWorkerForm 
-              post={selectedPost} 
-              workers={workers}
-              onClose={() => setShowAssignDialog(false)}
-              onUpdatePost={updatePost}
-              user={user}
-              onCreateTask={createTask}
-              refreshPosts={refreshPosts}
-            />
-          )}
+          <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+            {selectedPost && (
+              <AssignWorkerForm 
+                post={selectedPost} 
+                workers={workers}
+                onClose={() => setShowAssignDialog(false)}
+                onUpdatePost={updatePost}
+                user={user}
+                onCreateTask={createTask}
+                refreshPosts={refreshPosts}
+              />
+            )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 
@@ -863,14 +865,16 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
 
       {/* Add Worker Dialog */}
       <Dialog open={showAddWorkerDialog} onOpenChange={setShowAddWorkerDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Add New Worker</DialogTitle>
           </DialogHeader>
-          <AddWorkerForm 
-            onClose={() => setShowAddWorkerDialog(false)}
-            onAddWorker={handleAddWorker}
-          />
+          <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+            <AddWorkerForm 
+              onClose={() => setShowAddWorkerDialog(false)}
+              onAddWorker={handleAddWorker}
+            />
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>

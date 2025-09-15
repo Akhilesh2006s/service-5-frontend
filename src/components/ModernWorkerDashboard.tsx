@@ -450,18 +450,20 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ user, currentV
 
       {/* Task Completion Dialog */}
       <Dialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Task Completion</DialogTitle>
           </DialogHeader>
-          {selectedTask && (
-            <TaskCompletionForm 
-              task={selectedTask} 
-              user={user}
-              onClose={() => setShowCompletionDialog(false)}
-              onUpdatePost={updatePost}
-            />
-          )}
+          <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+            {selectedTask && (
+              <TaskCompletionForm 
+                task={selectedTask} 
+                user={user}
+                onClose={() => setShowCompletionDialog(false)}
+                onUpdatePost={updatePost}
+              />
+            )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>

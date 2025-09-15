@@ -472,21 +472,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
 
       {/* Add User Dialog */}
       <Dialog open={showAddUserDialog} onOpenChange={setShowAddUserDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
           </DialogHeader>
-          <AddUserForm 
-            onClose={() => setShowAddUserDialog(false)} 
-            onCreateUser={async (userData) => {
-              if (userData.role === 'government') {
-                return await createGovernmentOfficial(userData);
-              } else if (userData.role === 'worker') {
-                return await createWorker(userData);
-              }
-              return false;
-            }}
-          />
+          <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+            <AddUserForm 
+              onClose={() => setShowAddUserDialog(false)} 
+              onCreateUser={async (userData) => {
+                if (userData.role === 'government') {
+                  return await createGovernmentOfficial(userData);
+                } else if (userData.role === 'worker') {
+                  return await createWorker(userData);
+                }
+                return false;
+              }}
+            />
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
