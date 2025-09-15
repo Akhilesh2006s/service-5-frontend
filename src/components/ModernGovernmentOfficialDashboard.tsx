@@ -91,6 +91,8 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
         {console.log('Government Dashboard - Posts:', posts)}
         {posts.map((post) => {
           console.log('Government Dashboard - Rendering post:', post);
+          console.log('Post mediaFiles:', post.mediaFiles);
+          console.log('Post image:', post.image);
           return (
           <Card key={post.id} className="overflow-hidden">
             <CardHeader className="pb-3">
@@ -126,9 +128,49 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
             <CardContent className="pt-0">
               <p className="mb-4">{post.content}</p>
               
-              {post.image && (
+              {/* Render media files */}
+              {post.mediaFiles && post.mediaFiles.length > 0 && (
+                <div className="mb-4 space-y-2">
+                  {post.mediaFiles.map((media: any, index: number) => (
+                    <div key={index} className="rounded-lg overflow-hidden">
+                      {media.type === 'image' ? (
+                        <img 
+                          src={media.url} 
+                          alt={`Post media ${index + 1}`} 
+                          className="w-full h-64 object-cover"
+                          onError={(e) => {
+                            console.error('Error loading image:', media.url);
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      ) : media.type === 'video' ? (
+                        <video 
+                          src={media.url} 
+                          className="w-full h-64 object-cover"
+                          controls
+                          onError={(e) => {
+                            console.error('Error loading video:', media.url);
+                            (e.target as HTMLVideoElement).style.display = 'none';
+                          }}
+                        />
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Fallback for old image format */}
+              {post.image && !post.mediaFiles && (
                 <div className="mb-4 rounded-lg overflow-hidden">
-                  <img src={post.image} alt="Post" className="w-full h-64 object-cover" />
+                  <img 
+                    src={post.image} 
+                    alt="Post" 
+                    className="w-full h-64 object-cover"
+                    onError={(e) => {
+                      console.error('Error loading fallback image:', post.image);
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
                 </div>
               )}
               
