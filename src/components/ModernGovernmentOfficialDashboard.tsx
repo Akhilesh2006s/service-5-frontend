@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, CheckCircle, AlertCircle, Clock, MapPin, Hash, Filter, Search, UserPlus, FileText, BarChart3, MessageCircle, Heart, Share2 } from 'lucide-react';
+import { Users, CheckCircle, AlertCircle, Clock, MapPin, Hash, Filter, Search, UserPlus, FileText, BarChart3, MessageCircle, Heart, Share2, MoreVertical, Edit, Eye, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -24,6 +25,8 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const { posts, updatePost } = usePosts();
 
@@ -153,18 +156,46 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                     {post.shares}
                   </Button>
                 </div>
-                {post.status === 'pending' && (
-                  <Button 
-                    onClick={() => {
-                      setSelectedPost(post);
-                      setShowAssignDialog(true);
-                    }}
-                    size="sm"
-                  >
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Assign
-                  </Button>
-                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        setSelectedPost(post);
+                        setShowAssignDialog(true);
+                      }}
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Assign Worker
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        setSelectedPost(post);
+                        setShowStatusDialog(true);
+                      }}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Update Status
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        setSelectedPost(post);
+                        setShowCommentDialog(true);
+                      }}
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Add Comment
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Details
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </CardContent>
           </Card>
@@ -327,6 +358,38 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Update Status Dialog */}
+      <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Status</DialogTitle>
+          </DialogHeader>
+          {selectedPost && (
+            <UpdateStatusForm 
+              post={selectedPost}
+              onClose={() => setShowStatusDialog(false)}
+              onUpdatePost={updatePost}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Comment Dialog */}
+      <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Comment</DialogTitle>
+          </DialogHeader>
+          {selectedPost && (
+            <AddCommentForm 
+              post={selectedPost}
+              onClose={() => setShowCommentDialog(false)}
+              onUpdatePost={updatePost}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -410,6 +473,117 @@ const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => voi
          <Button type="submit" disabled={!selectedWorker || selectedWorker === 'none'}>
            Assign Task
          </Button>
+      </div>
+    </form>
+  );
+};
+
+// Update Status Form Component
+const UpdateStatusForm: React.FC<{ post: any; onClose: () => void; onUpdatePost: (id: number, updates: any) => void }> = ({ post, onClose, onUpdatePost }) => {
+  const [status, setStatus] = useState(post.status);
+  const [notes, setNotes] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onUpdatePost(post.id, {
+      status: status,
+      statusNotes: notes,
+      updatedAt: new Date().toISOString()
+    });
+    console.log('Updating status:', { post: post.id, status, notes });
+    onClose();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="p-4 bg-muted/50 rounded-lg">
+        <p className="text-sm font-medium mb-2">Issue Details:</p>
+        <p className="text-sm text-muted-foreground">{post.content}</p>
+        <p className="text-sm text-muted-foreground mt-1">Location: {post.location}</p>
+      </div>
+      
+      <div>
+        <label className="text-sm font-medium">Status</label>
+        <Select value={status} onValueChange={setStatus}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="assigned">Assigned</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div>
+        <label className="text-sm font-medium">Notes (Optional)</label>
+        <Textarea
+          placeholder="Add any notes about the status change..."
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button type="submit">
+          Update Status
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+// Add Comment Form Component
+const AddCommentForm: React.FC<{ post: any; onClose: () => void; onUpdatePost: (id: number, updates: any) => void }> = ({ post, onClose, onUpdatePost }) => {
+  const [comment, setComment] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newComment = {
+      id: Date.now(),
+      text: comment,
+      author: 'Government Official',
+      createdAt: new Date().toISOString()
+    };
+    
+    onUpdatePost(post.id, {
+      comments: [...(post.comments || []), newComment]
+    });
+    console.log('Adding comment:', { post: post.id, comment });
+    onClose();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="p-4 bg-muted/50 rounded-lg">
+        <p className="text-sm font-medium mb-2">Issue Details:</p>
+        <p className="text-sm text-muted-foreground">{post.content}</p>
+        <p className="text-sm text-muted-foreground mt-1">Location: {post.location}</p>
+      </div>
+      
+      <div>
+        <label className="text-sm font-medium">Comment</label>
+        <Textarea
+          placeholder="Add your comment or update..."
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          className="min-h-24"
+        />
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={!comment.trim()}>
+          Add Comment
+        </Button>
       </div>
     </form>
   );
