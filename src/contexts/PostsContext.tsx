@@ -279,7 +279,7 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
           setPosts(fallbackPosts);
           console.log('Using fallback posts from localStorage (no auth):', fallbackPosts.length);
         } else {
-          // Use default mock data
+          // Use default mock data with working images
           const defaultPosts = [
             {
               id: 1,
@@ -290,7 +290,7 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
               mediaFiles: [
                 {
                   file: null,
-                  url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500',
+                  url: 'https://picsum.photos/400/300?random=1',
                   type: 'image'
                 }
               ],
@@ -302,6 +302,50 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
               likes: 12,
               comments: 5,
               shares: 3
+            },
+            {
+              id: 2,
+              user: { name: 'Sarah Wilson', avatar: '', role: 'citizen' },
+              content: 'Large pothole on Oak Avenue causing traffic issues. Cars are swerving to avoid it. #potholes #roads #oakavenue',
+              image: null,
+              video: null,
+              mediaFiles: [
+                {
+                  file: null,
+                  url: 'https://picsum.photos/400/300?random=2',
+                  type: 'image'
+                }
+              ],
+              hashtags: ['#potholes', '#roads', '#oakavenue'],
+              location: 'Oak Avenue',
+              status: 'pending',
+              assignedTo: null,
+              createdAt: '4 hours ago',
+              likes: 8,
+              comments: 3,
+              shares: 1
+            },
+            {
+              id: 3,
+              user: { name: 'Mike Johnson', avatar: '', role: 'citizen' },
+              content: 'Garbage collection was missed on Pine Street. Bins are overflowing. #garbage #sanitation #missedcollection',
+              image: null,
+              video: null,
+              mediaFiles: [
+                {
+                  file: null,
+                  url: 'https://picsum.photos/400/300?random=3',
+                  type: 'image'
+                }
+              ],
+              hashtags: ['#garbage', '#sanitation', '#missedcollection'],
+              location: 'Pine Street',
+              status: 'in-progress',
+              assignedTo: 'Sanitation Department',
+              createdAt: '6 hours ago',
+              likes: 15,
+              comments: 7,
+              shares: 2
             }
           ];
           setPosts(defaultPosts);
