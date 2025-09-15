@@ -404,9 +404,24 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
   };
 
   const deletePost = async (id: number) => {
+    console.log('Deleting post with ID:', id);
+    
     if (!token) {
-      // If no token, just update local state
-      setPosts(prevPosts => prevPosts.filter(post => post.id !== id));
+      // If no token, remove from local state and localStorage
+      setPosts(prevPosts => {
+        const newPosts = prevPosts.filter(post => post.id !== id);
+        console.log('Removed post from local state, remaining posts:', newPosts.length);
+        
+        // Update localStorage
+        try {
+          localStorage.setItem('local-gov-posts', JSON.stringify(newPosts));
+          console.log('Updated localStorage after deletion');
+        } catch (error) {
+          console.error('Error updating localStorage:', error);
+        }
+        
+        return newPosts;
+      });
       return;
     }
 
@@ -420,14 +435,22 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       });
 
       if (response.ok) {
-        setPosts(prevPosts => prevPosts.filter(post => post.id !== id));
+        setPosts(prevPosts => {
+          const newPosts = prevPosts.filter(post => post.id !== id);
+          console.log('Removed post from backend and local state');
+          return newPosts;
+        });
       } else {
         throw new Error('Failed to delete post');
       }
     } catch (err) {
       console.error('Error deleting post:', err);
       // Fallback to local state
-      setPosts(prevPosts => prevPosts.filter(post => post.id !== id));
+      setPosts(prevPosts => {
+        const newPosts = prevPosts.filter(post => post.id !== id);
+        console.log('Fallback: Removed post from local state');
+        return newPosts;
+      });
     }
   };
 

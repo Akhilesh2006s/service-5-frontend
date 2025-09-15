@@ -692,7 +692,11 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={!content.trim() || loading}>
+        <Button 
+          type="submit" 
+          disabled={loading}
+          className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+        >
           {loading ? 'Posting...' : 'Post Issue'}
         </Button>
       </div>
