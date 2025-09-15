@@ -130,13 +130,25 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                   {post.mediaFiles.map((media, index) => (
                     <div key={index} className="rounded-lg overflow-hidden">
                       {media.type === 'image' ? (
-                        <img src={media.url} alt="Post" className="w-full h-64 object-cover" />
+                        <img 
+                          src={media.url} 
+                          alt="Post" 
+                          className="w-full h-64 object-cover"
+                          onError={(e) => {
+                            console.error('Image failed to load:', media.url);
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
                       ) : (
                         <video 
                           src={media.url} 
                           controls 
                           className="w-full h-64 object-cover"
                           preload="metadata"
+                          onError={(e) => {
+                            console.error('Video failed to load:', media.url);
+                            e.currentTarget.style.display = 'none';
+                          }}
                         >
                           Your browser does not support the video tag.
                         </video>
@@ -149,7 +161,15 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
               {/* Fallback for old posts with single image */}
               {!post.mediaFiles && post.image && (
                 <div className="mb-4 rounded-lg overflow-hidden">
-                  <img src={post.image} alt="Post" className="w-full h-64 object-cover" />
+                  <img 
+                    src={post.image} 
+                    alt="Post" 
+                    className="w-full h-64 object-cover"
+                    onError={(e) => {
+                      console.error('Fallback image failed to load:', post.image);
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
                 </div>
               )}
               

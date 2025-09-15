@@ -71,6 +71,47 @@ const convertBackendPost = (backendPost: any): Post => {
     }
   }
 
+  // Convert backend images/videos arrays to frontend mediaFiles format
+  const mediaFiles: any[] = [];
+  
+  // Add images
+  if (backendPost.images && Array.isArray(backendPost.images)) {
+    backendPost.images.forEach((imageUrl: string) => {
+      if (imageUrl) {
+        mediaFiles.push({
+          file: null,
+          url: imageUrl,
+          type: 'image'
+        });
+      }
+    });
+  }
+  
+  // Add videos
+  if (backendPost.videos && Array.isArray(backendPost.videos)) {
+    backendPost.videos.forEach((videoUrl: string) => {
+      if (videoUrl) {
+        mediaFiles.push({
+          file: null,
+          url: videoUrl,
+          type: 'video'
+        });
+      }
+    });
+  }
+
+  // Fallback to single image/video if mediaFiles doesn't exist
+  let singleImage = null;
+  let singleVideo = null;
+  if (mediaFiles.length === 0) {
+    if (backendPost.image) {
+      singleImage = backendPost.image;
+    }
+    if (backendPost.video) {
+      singleVideo = backendPost.video;
+    }
+  }
+
   return {
     id: backendPost._id || Date.now(),
     user: {
@@ -79,9 +120,9 @@ const convertBackendPost = (backendPost: any): Post => {
       role: backendPost.author?.role || 'citizen'
     },
     content: backendPost.description || backendPost.title || '',
-    image: backendPost.image || null,
-    video: backendPost.video || null,
-    mediaFiles: backendPost.mediaFiles || [],
+    image: singleImage,
+    video: singleVideo,
+    mediaFiles: mediaFiles,
     hashtags: backendPost.hashtags || [],
     location: backendPost.location || 'Unknown Location',
     status: backendPost.status || 'pending',
@@ -122,7 +163,9 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
 
       if (response.ok) {
         const backendPosts = await response.json();
+        console.log('Backend posts received:', backendPosts);
         const convertedPosts = backendPosts.map(convertBackendPost);
+        console.log('Converted posts:', convertedPosts);
         setPosts(convertedPosts);
         console.log('Successfully fetched posts:', convertedPosts.length);
       } else {
