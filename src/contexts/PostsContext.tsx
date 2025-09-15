@@ -190,7 +190,8 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
               id: 1,
               user: { name: 'John Doe', avatar: '', role: 'citizen' },
               content: 'The street lights on Main Street have been out for 3 days now. It\'s getting dangerous to walk at night. #streetlights #safety #mainstreet',
-              image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500',
+              image: null, // Remove this to test mediaFiles only
+              video: null,
               mediaFiles: [
                 {
                   file: null,
@@ -206,6 +207,50 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
               likes: 12,
               comments: 5,
               shares: 3
+            },
+            {
+              id: 2,
+              user: { name: 'Sarah Wilson', avatar: '', role: 'citizen' },
+              content: 'Pothole on Oak Avenue is getting bigger every day. Almost damaged my car yesterday! #potholes #roads #oakavenue',
+              image: null,
+              video: null,
+              mediaFiles: [
+                {
+                  file: null,
+                  url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500',
+                  type: 'image'
+                }
+              ],
+              hashtags: ['#potholes', '#roads', '#oakavenue'],
+              location: 'Oak Avenue',
+              status: 'in_progress',
+              assignedTo: 'Road Maintenance Team',
+              createdAt: '4 hours ago',
+              likes: 8,
+              comments: 2,
+              shares: 1
+            },
+            {
+              id: 3,
+              user: { name: 'Mike Johnson', avatar: '', role: 'citizen' },
+              content: 'Garbage collection was missed on our street this week. Trash is piling up! #garbage #sanitation #missedcollection',
+              image: null,
+              video: null,
+              mediaFiles: [
+                {
+                  file: null,
+                  url: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2f6c5?w=500',
+                  type: 'image'
+                }
+              ],
+              hashtags: ['#garbage', '#sanitation', '#missedcollection'],
+              location: 'Pine Street',
+              status: 'completed',
+              assignedTo: 'Sanitation Department',
+              createdAt: '1 day ago',
+              likes: 15,
+              comments: 8,
+              shares: 4
             }
           ];
           setPosts(defaultPosts);

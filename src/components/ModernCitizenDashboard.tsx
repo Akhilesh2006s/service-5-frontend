@@ -141,6 +141,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                           src={media.url} 
                           alt="Post" 
                           className="w-full h-64 object-cover"
+                          onLoad={() => console.log('Image loaded successfully:', media.url)}
                           onError={(e) => {
                             console.error('Image failed to load:', media.url);
                             e.currentTarget.style.display = 'none';
@@ -152,6 +153,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                           controls 
                           className="w-full h-64 object-cover"
                           preload="metadata"
+                          onLoadStart={() => console.log('Video loading started:', media.url)}
                           onError={(e) => {
                             console.error('Video failed to load:', media.url);
                             e.currentTarget.style.display = 'none';
@@ -165,6 +167,18 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                   })}
                 </div>
               )}
+              
+              {/* Test image to verify rendering works */}
+              <div className="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
+                <p className="text-sm text-yellow-800 mb-2">Test Image (should always show):</p>
+                <img 
+                  src="https://via.placeholder.com/400x200/4F46E5/FFFFFF?text=Test+Image" 
+                  alt="Test" 
+                  className="w-full h-32 object-cover rounded"
+                  onLoad={() => console.log('Test image loaded successfully')}
+                  onError={(e) => console.error('Test image failed to load')}
+                />
+              </div>
               
               {/* Fallback for old posts with single image */}
               {!post.mediaFiles && post.image && (
