@@ -912,8 +912,21 @@ const AddWorkerForm: React.FC<{ onClose: () => void; onAddWorker: (worker: any) 
     email: '',
     phone: '',
     department: '',
-    designation: ''
+    designation: '',
+    password: Math.random().toString(36).slice(-8) // Auto-generate initial password
   });
+
+  // Reset form when component mounts
+  React.useEffect(() => {
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      department: '',
+      designation: '',
+      password: Math.random().toString(36).slice(-8)
+    });
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -990,11 +1003,38 @@ const AddWorkerForm: React.FC<{ onClose: () => void; onAddWorker: (worker: any) 
         />
       </div>
       
+      <div>
+        <label className="text-sm font-medium">Password</label>
+        <div className="flex space-x-2">
+          <Input
+            value={formData.password}
+            onChange={(e) => handleChange('password', e.target.value)}
+            placeholder="Auto-generated password"
+            required
+            readOnly
+            className="bg-gray-50"
+          />
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => {
+              const newPassword = Math.random().toString(36).slice(-8);
+              handleChange('password', newPassword);
+            }}
+          >
+            Generate
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Password will be auto-generated. Click "Generate" to create a new one.
+        </p>
+      </div>
+      
       <div className="flex justify-end space-x-2">
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={!formData.name || !formData.email || !formData.phone || !formData.department || !formData.designation}>
+        <Button type="submit" disabled={!formData.name || !formData.email || !formData.phone || !formData.department || !formData.designation || !formData.password}>
           Add Worker
         </Button>
       </div>
