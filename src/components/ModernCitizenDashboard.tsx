@@ -573,15 +573,32 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
             const errorText = await uploadResponse.text();
             console.error('File upload failed with status:', uploadResponse.status);
             console.error('Upload error response:', errorText);
-            console.warn('File upload failed, using local URLs as fallback');
-            // Fallback to local URLs
-            selectedFiles.forEach(file => {
-              if (file.type.startsWith('image/')) {
-                imageUrls.push(URL.createObjectURL(file));
-              } else if (file.type.startsWith('video/')) {
-                videoUrls.push(URL.createObjectURL(file));
+            console.warn('File upload failed, converting to base64 for persistence');
+            // Fallback to base64 for persistence
+            for (const file of selectedFiles) {
+              try {
+                const base64 = await new Promise<string>((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onload = () => resolve(reader.result as string);
+                  reader.onerror = reject;
+                  reader.readAsDataURL(file);
+                });
+                
+                if (file.type.startsWith('image/')) {
+                  imageUrls.push(base64);
+                } else if (file.type.startsWith('video/')) {
+                  videoUrls.push(base64);
+                }
+              } catch (base64Error) {
+                console.error('Error converting file to base64:', base64Error);
+                // Final fallback to blob URL
+                if (file.type.startsWith('image/')) {
+                  imageUrls.push(URL.createObjectURL(file));
+                } else if (file.type.startsWith('video/')) {
+                  videoUrls.push(URL.createObjectURL(file));
+                }
               }
-            });
+            }
           }
         } catch (error) {
           console.warn('File upload error, converting to base64 for persistence:', error);
