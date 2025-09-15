@@ -167,7 +167,24 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
         console.log('Backend posts received:', backendPosts);
         const convertedPosts = backendPosts.map(convertBackendPost);
         console.log('Converted posts:', convertedPosts);
-        setPosts(convertedPosts);
+        
+        // Check localStorage for any deleted posts and filter them out
+        try {
+          const stored = localStorage.getItem('local-gov-posts');
+          if (stored) {
+            const localPosts = JSON.parse(stored);
+            const localPostIds = localPosts.map((post: any) => post.id);
+            const filteredPosts = convertedPosts.filter(post => localPostIds.includes(post.id));
+            console.log('Filtered posts based on localStorage:', filteredPosts.length);
+            setPosts(filteredPosts);
+          } else {
+            setPosts(convertedPosts);
+          }
+        } catch (error) {
+          console.error('Error checking localStorage:', error);
+          setPosts(convertedPosts);
+        }
+        
         console.log('Successfully fetched posts:', convertedPosts.length);
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -438,6 +455,15 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
         setPosts(prevPosts => {
           const newPosts = prevPosts.filter(post => post.id !== id);
           console.log('Removed post from backend and local state');
+          
+          // Also update localStorage for consistency
+          try {
+            localStorage.setItem('local-gov-posts', JSON.stringify(newPosts));
+            console.log('Updated localStorage after backend deletion');
+          } catch (error) {
+            console.error('Error updating localStorage:', error);
+          }
+          
           return newPosts;
         });
       } else {
@@ -449,6 +475,15 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       setPosts(prevPosts => {
         const newPosts = prevPosts.filter(post => post.id !== id);
         console.log('Fallback: Removed post from local state');
+        
+        // Update localStorage in fallback case too
+        try {
+          localStorage.setItem('local-gov-posts', JSON.stringify(newPosts));
+          console.log('Updated localStorage in fallback case');
+        } catch (error) {
+          console.error('Error updating localStorage in fallback:', error);
+        }
+        
         return newPosts;
       });
     }
