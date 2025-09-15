@@ -484,15 +484,23 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
       
       // Add actual file URLs if files are selected
       if (selectedFiles.length > 0) {
+        console.log('Processing selected files:', selectedFiles);
         selectedFiles.forEach(file => {
+          console.log('Processing file:', file.name, file.type);
           if (file.type.startsWith('image/')) {
             // Use the actual file URL
-            imageUrls.push(URL.createObjectURL(file));
+            const fileUrl = URL.createObjectURL(file);
+            imageUrls.push(fileUrl);
+            console.log('Added image URL:', fileUrl);
           } else if (file.type.startsWith('video/')) {
             // Use the actual file URL
-            videoUrls.push(URL.createObjectURL(file));
+            const fileUrl = URL.createObjectURL(file);
+            videoUrls.push(fileUrl);
+            console.log('Added video URL:', fileUrl);
           }
         });
+        console.log('Final imageUrls:', imageUrls);
+        console.log('Final videoUrls:', videoUrls);
       }
 
       // Prepare data for backend (using title and description as required by backend)
@@ -568,11 +576,15 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
           content: content,
           image: null,
           video: null,
-          mediaFiles: selectedFiles.map(file => ({
-            file: file,
-            url: URL.createObjectURL(file),
-            type: file.type.startsWith('image/') ? 'image' : 'video'
-          })),
+          mediaFiles: selectedFiles.map(file => {
+            const fileUrl = URL.createObjectURL(file);
+            console.log('Creating mediaFile for unauthenticated user:', file.name, fileUrl);
+            return {
+              file: file,
+              url: fileUrl,
+              type: file.type.startsWith('image/') ? 'image' : 'video'
+            };
+          }),
           hashtags: allHashtags,
           location: location,
           status: 'pending',
@@ -647,6 +659,33 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
           maxSize={10}
           acceptedTypes={['image/*', 'video/*']}
         />
+        
+        {/* Preview selected files */}
+        {selectedFiles.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-medium mb-2">Preview:</p>
+            <div className="grid grid-cols-2 gap-2">
+              {selectedFiles.map((file, index) => (
+                <div key={index} className="border rounded-lg p-2">
+                  {file.type.startsWith('image/') ? (
+                    <img 
+                      src={URL.createObjectURL(file)} 
+                      alt={file.name}
+                      className="w-full h-32 object-cover rounded"
+                    />
+                  ) : file.type.startsWith('video/') ? (
+                    <video 
+                      src={URL.createObjectURL(file)} 
+                      className="w-full h-32 object-cover rounded"
+                      controls
+                    />
+                  ) : null}
+                  <p className="text-xs mt-1 truncate">{file.name}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       
       <div className="flex justify-end space-x-2">
