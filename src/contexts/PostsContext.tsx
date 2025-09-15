@@ -91,37 +91,70 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
   const { token } = useAuth();
 
   const fetchPosts = async () => {
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
       
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Add authorization header if token exists
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch(`${API_BASE_URL}/posts`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers
       });
 
       if (response.ok) {
         const backendPosts = await response.json();
         const convertedPosts = backendPosts.map(convertBackendPost);
         setPosts(convertedPosts);
+        console.log('Successfully fetched posts:', convertedPosts.length);
       } else {
-        throw new Error(`Failed to fetch posts: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to fetch posts: ${response.statusText}`);
       }
     } catch (err) {
       console.error('Error fetching posts:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch posts');
+      
       // Fallback to localStorage if API fails
       try {
         const stored = localStorage.getItem('local-gov-posts');
         if (stored) {
-          setPosts(JSON.parse(stored));
+          const fallbackPosts = JSON.parse(stored);
+          setPosts(fallbackPosts);
+          console.log('Using fallback posts from localStorage:', fallbackPosts.length);
+        } else {
+          // If no stored posts, use default mock data
+          const defaultPosts = [
+            {
+              id: 1,
+              user: { name: 'John Doe', avatar: '', role: 'citizen' },
+              content: 'The street lights on Main Street have been out for 3 days now. It\'s getting dangerous to walk at night. #streetlights #safety #mainstreet',
+              image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500',
+              mediaFiles: [
+                {
+                  file: null,
+                  url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500',
+                  type: 'image'
+                }
+              ],
+              hashtags: ['#streetlights', '#safety', '#mainstreet'],
+              location: 'Main Street, Downtown',
+              status: 'assigned',
+              assignedTo: 'Public Works Department',
+              createdAt: '2 hours ago',
+              likes: 12,
+              comments: 5,
+              shares: 3
+            }
+          ];
+          setPosts(defaultPosts);
+          console.log('Using default mock posts');
         }
       } catch (storageError) {
         console.error('Error loading from localStorage:', storageError);
