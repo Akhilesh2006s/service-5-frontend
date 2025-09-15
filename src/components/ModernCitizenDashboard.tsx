@@ -29,6 +29,9 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
   const [showCreatePost, setShowCreatePost] = useState(false);
   const { posts, addPost, deletePost, savePostsToLocalStorage } = usePosts();
 
+  // Debug user object
+  console.log('CitizenDashboard user object:', user);
+
   const trendingHashtags = [
     { tag: '#streetlights', count: 24 },
     { tag: '#potholes', count: 18 },
@@ -126,7 +129,14 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                     {getStatusIcon(post.status)}
                     <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
                   </Badge>
-                  {post.user.name === user.name && (
+                  {(() => {
+                    console.log('Checking delete visibility:', {
+                      postAuthor: post.user.name,
+                      currentUser: user.name,
+                      shouldShow: post.user.name === user.name
+                    });
+                    return post.user.name === user.name;
+                  })() && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
