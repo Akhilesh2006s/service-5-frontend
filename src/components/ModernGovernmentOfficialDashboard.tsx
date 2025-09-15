@@ -582,8 +582,12 @@ const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => voi
   };
 
   const availableWorkers = workers.filter(worker => 
-    worker.department === post.department && worker.status === 'available'
+    worker.status === 'available'
   );
+
+  console.log('AssignWorkerForm - workers:', workers);
+  console.log('AssignWorkerForm - availableWorkers:', availableWorkers);
+  console.log('AssignWorkerForm - post:', post);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -602,7 +606,7 @@ const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => voi
            <SelectContent>
              <SelectItem value="none">Choose a worker</SelectItem>
              {availableWorkers.map((worker) => (
-               <SelectItem key={worker.id} value={worker.id}>
+               <SelectItem key={worker.id} value={worker.id.toString()}>
                  {worker.name} - {worker.department}
                </SelectItem>
              ))}
