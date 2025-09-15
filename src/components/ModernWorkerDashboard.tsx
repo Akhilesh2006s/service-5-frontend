@@ -253,7 +253,27 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ user, currentV
             <CardContent className="pt-0">
               <p className="mb-4">{task.content}</p>
               
-              {task.image && (
+              {task.mediaFiles && task.mediaFiles.length > 0 && (
+                <div className="mb-4 space-y-2">
+                  {task.mediaFiles.map((media, index) => (
+                    <div key={index} className="rounded-lg overflow-hidden">
+                      {media.type === 'image' ? (
+                        <img src={media.url} alt="Task" className="w-full h-64 object-cover" />
+                      ) : (
+                        <video
+                          src={media.url}
+                          controls
+                          className="w-full h-64 object-cover"
+                          preload="metadata"
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {!task.mediaFiles && task.image && (
                 <div className="mb-4 rounded-lg overflow-hidden">
                   <img src={task.image} alt="Task" className="w-full h-64 object-cover" />
                 </div>
@@ -270,20 +290,20 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ user, currentV
               
               <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-muted/50 rounded-lg">
                 <div>
-                  <p className="text-sm font-medium">Assigned by:</p>
-                  <p className="text-sm text-muted-foreground">{task.assignedBy}</p>
+                  <p className="text-sm font-medium">Assigned to:</p>
+                  <p className="text-sm text-muted-foreground">{task.assignedTo || 'Not assigned'}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Due Date:</p>
-                  <p className="text-sm text-muted-foreground">{task.dueDate}</p>
+                  <p className="text-sm font-medium">Priority:</p>
+                  <p className="text-sm text-muted-foreground">{task.priority || 'Not set'}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Estimated Time:</p>
-                  <p className="text-sm text-muted-foreground">{task.estimatedTime}</p>
+                  <p className="text-sm font-medium">Status:</p>
+                  <p className="text-sm text-muted-foreground capitalize">{task.status.replace('_', ' ')}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Department:</p>
-                  <p className="text-sm text-muted-foreground">{task.department}</p>
+                  <p className="text-sm font-medium">Created:</p>
+                  <p className="text-sm text-muted-foreground">{task.createdAt}</p>
                 </div>
               </div>
               
@@ -347,7 +367,7 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ user, currentV
                   {getStatusIcon(task.status)}
                   <span className="ml-1 capitalize">{task.status.replace('_', ' ')}</span>
                 </Badge>
-                <span className="text-sm text-muted-foreground">Completed {task.completedAt}</span>
+                <span className="text-sm text-muted-foreground">Completed {task.completedAt || task.createdAt}</span>
               </div>
               
               <div className="flex items-start space-x-4">
@@ -367,8 +387,18 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ user, currentV
                       Task completed successfully
                     </p>
                     <p className="text-xs text-green-600 dark:text-green-300 mt-1">
-                      Completed by: {user.name}
+                      Completed by: {task.completedBy || user.name}
                     </p>
+                    {task.workDone && (
+                      <p className="text-xs text-green-600 dark:text-green-300 mt-1">
+                        Work done: {task.workDone}
+                      </p>
+                    )}
+                    {task.timeSpent && (
+                      <p className="text-xs text-green-600 dark:text-green-300 mt-1">
+                        Time spent: {task.timeSpent}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
