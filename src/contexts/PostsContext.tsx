@@ -22,6 +22,8 @@ interface Post {
   location: string;
   status: 'pending' | 'assigned' | 'in_progress' | 'completed';
   assignedTo?: string | null;
+  assignedBy?: string | null;
+  assignedAt?: string | null;
   assignedWorker?: string | null;
   priority?: 'low' | 'medium' | 'high';
   notes?: string;
@@ -71,6 +73,18 @@ const convertBackendPost = (backendPost: any): Post => {
       assignedTo = backendPost.assignedTo.name;
     } else {
       assignedTo = 'Unknown';
+    }
+  }
+
+  // Handle assignedBy field
+  let assignedBy = null;
+  if (backendPost.assignedBy) {
+    if (typeof backendPost.assignedBy === 'string') {
+      assignedBy = backendPost.assignedBy;
+    } else if (backendPost.assignedBy.name) {
+      assignedBy = backendPost.assignedBy.name;
+    } else {
+      assignedBy = 'Unknown';
     }
   }
 
@@ -165,6 +179,8 @@ const convertBackendPost = (backendPost: any): Post => {
     location: backendPost.location || 'Unknown Location',
     status: backendPost.status || 'pending',
     assignedTo: assignedTo,
+    assignedBy: assignedBy,
+    assignedAt: backendPost.assignedAt ? new Date(backendPost.assignedAt).toLocaleDateString() : null,
     assignedWorker: backendPost.assignedWorker || null,
     priority: backendPost.priority || 'medium',
     notes: backendPost.notes || '',

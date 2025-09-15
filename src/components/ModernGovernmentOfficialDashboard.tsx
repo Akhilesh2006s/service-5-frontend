@@ -30,7 +30,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [showAddWorkerDialog, setShowAddWorkerDialog] = useState(false);
   const [selectedPost, setSelectedPost] = useState<any>(null);
-  const { posts, updatePost, likePost, addComment } = usePosts();
+  const { posts, updatePost, likePost, addComment, refreshPosts } = usePosts();
 
   const [workers, setWorkers] = useState([]);
   const [workersLoading, setWorkersLoading] = useState(false);
@@ -823,6 +823,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
               onUpdatePost={updatePost}
               user={user}
               onCreateTask={createTask}
+              refreshPosts={refreshPosts}
             />
           )}
         </DialogContent>
@@ -877,7 +878,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
 };
 
 // Assign Worker Form Component
-const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => void; onUpdatePost: (id: number, updates: any) => void; user: any; onCreateTask: (taskData: any) => Promise<boolean> }> = ({ post, workers, onClose, onUpdatePost, user, onCreateTask }) => {
+const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => void; onUpdatePost: (id: number, updates: any) => void; user: any; onCreateTask: (taskData: any) => Promise<boolean>; refreshPosts: () => Promise<void> }> = ({ post, workers, onClose, onUpdatePost, user, onCreateTask, refreshPosts }) => {
   const [selectedWorker, setSelectedWorker] = useState('none');
   const [priority, setPriority] = useState(post.priority || 'medium');
   const [notes, setNotes] = useState('');
@@ -904,20 +905,9 @@ const AssignWorkerForm: React.FC<{ post: any; workers: any[]; onClose: () => voi
       const taskCreated = await onCreateTask(taskData);
       
       if (taskCreated) {
-        // Update post status locally
-        const assignmentDetails = {
-          status: 'assigned',
-          assignedTo: selectedWorkerData?.name,
-          assignedWorker: selectedWorker,
-          assignedWorkerId: selectedWorker,
-          assignedBy: user.name,
-          assignedByRole: user.role,
-          assignedAt: new Date().toISOString(),
-          priority: priority,
-          notes: notes
-        };
-        onUpdatePost(post.id, assignmentDetails);
-        console.log('Task created and worker assigned:', { post: post.id, assignmentDetails });
+        // Refresh posts to get updated data from database
+        await refreshPosts();
+        console.log('Task created and worker assigned:', { post: post.id, worker: selectedWorker });
         onClose();
       } else {
         alert('Failed to create task. Please try again.');
