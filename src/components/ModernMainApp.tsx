@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { Menu, X, Sun, Moon, User, Settings, LogOut, Home, TrendingUp, Users, FileText, BarChart3, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,8 @@ import { cn } from '@/lib/utils';
 // Import role-specific dashboards
 import { CitizenDashboard } from './ModernCitizenDashboard';
 import { GovernmentOfficialDashboard } from './ModernGovernmentOfficialDashboard';
-import { WorkerDashboard } from './ModernWorkerDashboard';
-import { AdminDashboard } from './ModernAdminDashboard';
+import { WorkerDashboard } from './WorkerDashboard';
+import { AdminDashboard } from './AdminDashboard';
 
 interface ModernMainAppProps {
   user: any;
@@ -24,6 +24,25 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [currentView, setCurrentView] = useState('home');
+  const [worker, setWorker] = useState<any>(null);
+
+  // Check for worker login on component mount
+  useEffect(() => {
+    const storedWorker = localStorage.getItem('worker');
+    if (storedWorker) {
+      setWorker(JSON.parse(storedWorker));
+    }
+  }, []);
+
+  const handleWorkerLogin = (workerData: any) => {
+    setWorker(workerData);
+  };
+
+  const handleWorkerLogout = () => {
+    setWorker(null);
+    localStorage.removeItem('worker');
+    localStorage.removeItem('workerToken');
+  };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -88,6 +107,12 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
   };
 
   const renderCurrentView = () => {
+    // If worker is logged in, show worker dashboard
+    if (worker) {
+      console.log('Rendering WorkerDashboard for logged in worker:', worker);
+      return <WorkerDashboard worker={worker} onLogout={handleWorkerLogout} />;
+    }
+
     console.log('ModernMainApp - User role:', user.role, 'User object:', user);
     switch (user.role) {
       case 'citizen':
@@ -104,7 +129,7 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
         return <WorkerDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
       case 'admin':
         console.log('Rendering AdminDashboard');
-        return <AdminDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
+        return <AdminDashboard user={user} onLogout={onLogout} />;
       default:
         console.log('Rendering CitizenDashboard (default)');
         return <CitizenDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
