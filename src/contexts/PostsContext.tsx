@@ -82,14 +82,21 @@ const convertBackendPost = (backendPost: any): Post => {
   // Add images
   if (backendPost.images && Array.isArray(backendPost.images)) {
     console.log('Processing images array:', backendPost.images);
-    backendPost.images.forEach((imageUrl: string) => {
-      if (imageUrl) {
-        console.log('Adding image to mediaFiles:', imageUrl);
-        mediaFiles.push({
-          file: null,
-          url: imageUrl,
-          type: 'image'
-        });
+    backendPost.images.forEach((imageData: any) => {
+      if (imageData) {
+        // Handle both old format (string URL) and new format (object with url and base64Data)
+        const imageUrl = typeof imageData === 'string' ? imageData : imageData.url;
+        const base64Data = typeof imageData === 'object' ? imageData.base64Data : null;
+        
+        if (imageUrl) {
+          console.log('Adding image to mediaFiles:', imageUrl, 'with base64:', !!base64Data);
+          mediaFiles.push({
+            file: null,
+            url: imageUrl,
+            type: 'image',
+            base64Data: base64Data
+          });
+        }
       }
     });
   }
@@ -97,14 +104,21 @@ const convertBackendPost = (backendPost: any): Post => {
   // Add videos
   if (backendPost.videos && Array.isArray(backendPost.videos)) {
     console.log('Processing videos array:', backendPost.videos);
-    backendPost.videos.forEach((videoUrl: string) => {
-      if (videoUrl) {
-        console.log('Adding video to mediaFiles:', videoUrl);
-        mediaFiles.push({
-          file: null,
-          url: videoUrl,
-          type: 'video'
-        });
+    backendPost.videos.forEach((videoData: any) => {
+      if (videoData) {
+        // Handle both old format (string URL) and new format (object with url and base64Data)
+        const videoUrl = typeof videoData === 'string' ? videoData : videoData.url;
+        const base64Data = typeof videoData === 'object' ? videoData.base64Data : null;
+        
+        if (videoUrl) {
+          console.log('Adding video to mediaFiles:', videoUrl, 'with base64:', !!base64Data);
+          mediaFiles.push({
+            file: null,
+            url: videoUrl,
+            type: 'video',
+            base64Data: base64Data
+          });
+        }
       }
     });
   }

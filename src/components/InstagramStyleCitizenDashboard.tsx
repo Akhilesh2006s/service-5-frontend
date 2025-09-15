@@ -518,10 +518,109 @@ const CreatePostForm: React.FC<{
     setLoading(true);
 
     try {
+      let uploadedMedia = [];
+      
+      // Upload files if any are selected
+      if (selectedFiles.length > 0) {
+        const formData = new FormData();
+        selectedFiles.forEach(file => {
+          formData.append('files', file);
+        });
+
+        const uploadResponse = await fetch('https://service-5-backend-production.up.railway.app/api/upload/multiple', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: formData
+        });
+
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json();
+          uploadedMedia = uploadResult.files.map(file => ({
+            url: file.fileUrl,
+            base64Data: file.base64Data,
+            type: file.mimetype.startsWith('image/') ? 'image' : 'video'
+          }));
+        } else {
+          console.error('Upload failed, using base64 fallback');
+          // Fallback to base64 for each file
+          for (const file of selectedFiles) {
+            const base64 = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.readAsDataURL(file);
+            });
+            uploadedMedia.push({
+              url: URL.createObjectURL(file),
+              base64Data: base64,
+              type: file.type.startsWith('image/') ? 'image' : 'video'
+            });
+          }
+        }
+      }
+
+      // Create post data
       const postData = {
         title: formData.title,
         description: formData.description,
         content: formData.description, // For compatibility
+        location: formData.location,
+        priority: formData.priority,
+        department: formData.department,
+        category: 'infrastructure', // Default category
+        images: uploadedMedia.filter(m => m.type === 'image').map(m => ({
+          url: m.url,
+          base64Data: m.base64Data
+        })),
+        videos: uploadedMedia.filter(m => m.type === 'video').map(m => ({
+          url: m.url,
+          base64Data: m.base64Data
+        })),
+        user: {
+          name: user.name,
+          email: user.email
+        },
+        createdAt: new Date().toISOString(),
+        likes: 0,
+        comments: 0,
+        status: 'pending'
+      };
+
+      // Send to backend
+      const response = await fetch('https://service-5-backend-production.up.railway.app/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(postData)
+      });
+
+      if (response.ok) {
+        const newPost = await response.json();
+        onPostCreated(newPost);
+      } else {
+        // Fallback to local post if backend fails
+        onPostCreated(postData);
+      }
+      
+      // Reset form
+      setFormData({
+        title: '',
+        description: '',
+        location: '',
+        priority: 'medium',
+        department: 'Public Works'
+      });
+      setSelectedFiles([]);
+    } catch (error) {
+      console.error('Error creating post:', error);
+      // Fallback to local post
+      const postData = {
+        title: formData.title,
+        description: formData.description,
+        content: formData.description,
         location: formData.location,
         priority: formData.priority,
         department: formData.department,
@@ -539,20 +638,7 @@ const CreatePostForm: React.FC<{
         comments: 0,
         status: 'pending'
       };
-
       onPostCreated(postData);
-      
-      // Reset form
-      setFormData({
-        title: '',
-        description: '',
-        location: '',
-        priority: 'medium',
-        department: 'Public Works'
-      });
-      setSelectedFiles([]);
-    } catch (error) {
-      console.error('Error creating post:', error);
     } finally {
       setLoading(false);
     }
