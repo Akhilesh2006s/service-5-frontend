@@ -168,20 +168,14 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
         const convertedPosts = backendPosts.map(convertBackendPost);
         console.log('Converted posts:', convertedPosts);
         
-        // Check localStorage for any deleted posts and filter them out
+        // Filter out deleted posts
         try {
-          const stored = localStorage.getItem('local-gov-posts');
-          if (stored) {
-            const localPosts = JSON.parse(stored);
-            const localPostIds = localPosts.map((post: any) => post.id);
-            const filteredPosts = convertedPosts.filter(post => localPostIds.includes(post.id));
-            console.log('Filtered posts based on localStorage:', filteredPosts.length);
-            setPosts(filteredPosts);
-          } else {
-            setPosts(convertedPosts);
-          }
+          const deletedPosts = JSON.parse(localStorage.getItem('deleted-posts') || '[]');
+          const filteredPosts = convertedPosts.filter(post => !deletedPosts.includes(post.id));
+          console.log('Filtered out deleted posts:', filteredPosts.length, 'out of', convertedPosts.length);
+          setPosts(filteredPosts);
         } catch (error) {
-          console.error('Error checking localStorage:', error);
+          console.error('Error filtering deleted posts:', error);
           setPosts(convertedPosts);
         }
         
@@ -293,8 +287,16 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
         const stored = localStorage.getItem('local-gov-posts');
         if (stored) {
           const fallbackPosts = JSON.parse(stored);
-          setPosts(fallbackPosts);
-          console.log('Using fallback posts from localStorage (no auth):', fallbackPosts.length);
+          // Filter out deleted posts
+          try {
+            const deletedPosts = JSON.parse(localStorage.getItem('deleted-posts') || '[]');
+            const filteredPosts = fallbackPosts.filter((post: any) => !deletedPosts.includes(post.id));
+            setPosts(filteredPosts);
+            console.log('Using fallback posts from localStorage (no auth):', filteredPosts.length);
+          } catch (error) {
+            console.error('Error filtering fallback posts:', error);
+            setPosts(fallbackPosts);
+          }
         } else {
           // Use default mock data with working images
           const defaultPosts = [
@@ -423,20 +425,23 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
   const deletePost = async (id: number) => {
     console.log('Deleting post with ID:', id);
     
+    // Add to deleted posts list in localStorage
+    try {
+      const deletedPosts = JSON.parse(localStorage.getItem('deleted-posts') || '[]');
+      if (!deletedPosts.includes(id)) {
+        deletedPosts.push(id);
+        localStorage.setItem('deleted-posts', JSON.stringify(deletedPosts));
+        console.log('Added post to deleted list:', id);
+      }
+    } catch (error) {
+      console.error('Error updating deleted posts list:', error);
+    }
+    
     if (!token) {
-      // If no token, remove from local state and localStorage
+      // If no token, remove from local state
       setPosts(prevPosts => {
         const newPosts = prevPosts.filter(post => post.id !== id);
         console.log('Removed post from local state, remaining posts:', newPosts.length);
-        
-        // Update localStorage
-        try {
-          localStorage.setItem('local-gov-posts', JSON.stringify(newPosts));
-          console.log('Updated localStorage after deletion');
-        } catch (error) {
-          console.error('Error updating localStorage:', error);
-        }
-        
         return newPosts;
       });
       return;
