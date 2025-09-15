@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Camera, Video, Hash, MapPin, AlertCircle, CheckCircle, Clock, MessageCircle, Heart, Share2, Filter, Search, TrendingUp } from 'lucide-react';
+import { Plus, Camera, Video, Hash, MapPin, AlertCircle, CheckCircle, Clock, MessageCircle, Heart, Share2, Filter, Search, TrendingUp, Trash2, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -26,7 +27,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedHashtag, setSelectedHashtag] = useState('all');
   const [showCreatePost, setShowCreatePost] = useState(false);
-  const { posts, addPost, savePostsToLocalStorage } = usePosts();
+  const { posts, addPost, deletePost, savePostsToLocalStorage } = usePosts();
 
   const trendingHashtags = [
     { tag: '#streetlights', count: 24 },
@@ -120,10 +121,34 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                     </div>
                   </div>
                 </div>
-                <Badge className={cn("text-xs", getStatusColor(post.status))}>
-                  {getStatusIcon(post.status)}
-                  <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
-                </Badge>
+                <div className="flex items-center space-x-2">
+                  <Badge className={cn("text-xs", getStatusColor(post.status))}>
+                    {getStatusIcon(post.status)}
+                    <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
+                  </Badge>
+                  {post.user.name === user.name && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            if (window.confirm('Are you sure you want to delete this post?')) {
+                              deletePost(post.id);
+                            }
+                          }}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete Post
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
@@ -274,7 +299,29 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                   {getStatusIcon(post.status)}
                   <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
                 </Badge>
-                <span className="text-sm text-muted-foreground">{post.createdAt}</span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-muted-foreground">{post.createdAt}</span>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem 
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to delete this post?')) {
+                            deletePost(post.id);
+                          }
+                        }}
+                        className="text-red-600 focus:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Post
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
               <p className="mb-4">{post.content}</p>
               {post.assignedTo && (
