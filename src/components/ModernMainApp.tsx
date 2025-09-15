@@ -28,7 +28,8 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'citizen': return <User className="h-4 w-4" />;
-      case 'government_official': return <Users className="h-4 w-4" />;
+      case 'government_official':
+      case 'government': return <Users className="h-4 w-4" />;
       case 'worker': return <CheckCircle className="h-4 w-4" />;
       case 'admin': return <BarChart3 className="h-4 w-4" />;
       default: return <User className="h-4 w-4" />;
@@ -38,7 +39,8 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'citizen': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'government_official': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'government_official':
+      case 'government': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'worker': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
       case 'admin': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
@@ -59,6 +61,7 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
           { id: 'assigned', label: 'Assigned Issues', icon: AlertCircle },
         ];
       case 'government_official':
+      case 'government':
         return [
           ...baseItems,
           { id: 'department-feed', label: 'Department Feed', icon: Users },
@@ -84,16 +87,25 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
   };
 
   const renderCurrentView = () => {
+    console.log('ModernMainApp - User role:', user.role, 'User object:', user);
     switch (user.role) {
       case 'citizen':
+        console.log('Rendering CitizenDashboard');
         return <CitizenDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
       case 'government_official':
+        console.log('Rendering GovernmentOfficialDashboard');
+        return <GovernmentOfficialDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
+      case 'government':
+        console.log('Rendering GovernmentOfficialDashboard (government role)');
         return <GovernmentOfficialDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
       case 'worker':
+        console.log('Rendering WorkerDashboard');
         return <WorkerDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
       case 'admin':
+        console.log('Rendering AdminDashboard');
         return <AdminDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
       default:
+        console.log('Rendering CitizenDashboard (default)');
         return <CitizenDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
     }
   };
