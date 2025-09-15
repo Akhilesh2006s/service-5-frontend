@@ -25,7 +25,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedHashtag, setSelectedHashtag] = useState('all');
   const [showCreatePost, setShowCreatePost] = useState(false);
-  const { posts, addPost } = usePosts();
+  const { posts, addPost, savePostsToLocalStorage } = usePosts();
 
   const trendingHashtags = [
     { tag: '#streetlights', count: 24 },
@@ -366,6 +366,10 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                 onPostCreated={(newPost) => {
                   console.log('onPostCreated called with:', newPost);
                   addPost(newPost);
+                  // Save to localStorage after a short delay to ensure state is updated
+                  setTimeout(() => {
+                    savePostsToLocalStorage();
+                  }, 100);
                   setShowCreatePost(false);
                 }}
               />

@@ -39,6 +39,7 @@ interface PostsContextType {
   loading: boolean;
   error: string | null;
   refreshPosts: () => Promise<void>;
+  savePostsToLocalStorage: () => void;
 }
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
@@ -284,7 +285,8 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
               id: 1,
               user: { name: 'John Doe', avatar: '', role: 'citizen' },
               content: 'The street lights on Main Street have been out for 3 days now. It\'s getting dangerous to walk at night. #streetlights #safety #mainstreet',
-              image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500',
+              image: null,
+              video: null,
               mediaFiles: [
                 {
                   file: null,
@@ -312,20 +314,25 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
     }
   }, [token]);
 
+  // Save posts to localStorage whenever posts change (for unauthenticated users)
+  useEffect(() => {
+    if (!token && posts.length > 0) {
+      try {
+        localStorage.setItem('local-gov-posts', JSON.stringify(posts));
+        console.log('Auto-saved posts to localStorage:', posts.length);
+      } catch (error) {
+        console.error('Error auto-saving posts to localStorage:', error);
+      }
+    }
+  }, [posts, token]);
+
   const addPost = async (post: Post) => {
     console.log('Adding new post:', post);
     if (!token) {
-      // If no token, just add to local state and save to localStorage
+      // If no token, just add to local state
       setPosts(prevPosts => {
         const newPosts = [post, ...prevPosts];
         console.log('Adding post to local state, new posts:', newPosts);
-        // Save to localStorage
-        try {
-          localStorage.setItem('local-gov-posts', JSON.stringify(newPosts));
-          console.log('Saved posts to localStorage');
-        } catch (error) {
-          console.error('Error saving to localStorage:', error);
-        }
         return newPosts;
       });
       return;
@@ -451,6 +458,17 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
     await fetchPosts();
   };
 
+  const savePostsToLocalStorage = () => {
+    if (!token && posts.length > 0) {
+      try {
+        localStorage.setItem('local-gov-posts', JSON.stringify(posts));
+        console.log('Manually saved posts to localStorage:', posts.length);
+      } catch (error) {
+        console.error('Error manually saving posts to localStorage:', error);
+      }
+    }
+  };
+
   return (
     <PostsContext.Provider value={{ 
       posts, 
@@ -459,7 +477,8 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       deletePost, 
       loading, 
       error, 
-      refreshPosts 
+      refreshPosts,
+      savePostsToLocalStorage
     }}>
       {children}
     </PostsContext.Provider>
