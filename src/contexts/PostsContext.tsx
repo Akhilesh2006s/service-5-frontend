@@ -90,11 +90,17 @@ const convertBackendPost = (backendPost: any): Post => {
         
         if (imageUrl) {
           console.log('Adding image to mediaFiles:', imageUrl, 'with base64:', !!base64Data);
+          // Check if this is a Railway upload URL that might be broken
+          const isRailwayUpload = imageUrl.includes('service-5-backend-production.up.railway.app/uploads/');
+          
           mediaFiles.push({
             file: null,
             url: imageUrl,
             type: 'image',
-            base64Data: base64Data
+            base64Data: base64Data,
+            isRailwayUpload: isRailwayUpload,
+            // Add a placeholder image as fallback for broken Railway URLs
+            fallbackImage: isRailwayUpload && !base64Data ? 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBhdmFpbGFibGU8L3RleHQ+PC9zdmc+' : null
           });
         }
       }
@@ -112,11 +118,17 @@ const convertBackendPost = (backendPost: any): Post => {
         
         if (videoUrl) {
           console.log('Adding video to mediaFiles:', videoUrl, 'with base64:', !!base64Data);
+          // Check if this is a Railway upload URL that might be broken
+          const isRailwayUpload = videoUrl.includes('service-5-backend-production.up.railway.app/uploads/');
+          
           mediaFiles.push({
             file: null,
             url: videoUrl,
             type: 'video',
-            base64Data: base64Data
+            base64Data: base64Data,
+            isRailwayUpload: isRailwayUpload,
+            // Add a placeholder for broken Railway URLs
+            fallbackImage: isRailwayUpload && !base64Data ? 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlZpZGVvIG5vdCBhdmFpbGFibGU8L3RleHQ+PC9zdmc+' : null
           });
         }
       }

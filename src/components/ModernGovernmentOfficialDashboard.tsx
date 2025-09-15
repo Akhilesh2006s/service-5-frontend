@@ -255,12 +255,16 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                             console.error('Error loading image:', media.url);
                             console.log('Media object:', media);
                             console.log('Has base64Data:', !!media.base64Data);
+                            console.log('Has fallbackImage:', !!media.fallbackImage);
                             // Try base64 fallback if available
                             if (media.base64Data) {
                               console.log('Using base64 fallback for image');
                               (e.target as HTMLImageElement).src = media.base64Data;
+                            } else if (media.fallbackImage) {
+                              console.log('Using fallback placeholder for image');
+                              (e.target as HTMLImageElement).src = media.fallbackImage;
                             } else {
-                              console.log('No base64 fallback available, hiding image');
+                              console.log('No fallback available, hiding image');
                               (e.target as HTMLImageElement).style.display = 'none';
                             }
                           }}
@@ -275,12 +279,21 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                             console.error('Error loading video:', media.url);
                             console.log('Video media object:', media);
                             console.log('Has base64Data:', !!media.base64Data);
+                            console.log('Has fallbackImage:', !!media.fallbackImage);
                             // Try base64 fallback if available
                             if (media.base64Data) {
                               console.log('Using base64 fallback for video');
                               (e.target as HTMLVideoElement).src = media.base64Data;
+                            } else if (media.fallbackImage) {
+                              console.log('Using fallback placeholder for video');
+                              // For videos, we'll show the fallback image instead
+                              const videoElement = e.target as HTMLVideoElement;
+                              const parentDiv = videoElement.parentElement;
+                              if (parentDiv) {
+                                parentDiv.innerHTML = `<img src="${media.fallbackImage}" alt="Video not available" class="w-full h-64 object-cover" />`;
+                              }
                             } else {
-                              console.log('No base64 fallback available, hiding video');
+                              console.log('No fallback available, hiding video');
                               (e.target as HTMLVideoElement).style.display = 'none';
                             }
                           }}

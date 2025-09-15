@@ -115,8 +115,13 @@ export const InstagramStyleCitizenDashboard: React.FC<CitizenDashboardProps> = (
                 onClick={() => setExpandedImage(media.url)}
                 onError={(e) => {
                   console.log('Image failed to load:', media.url);
+                  console.log('Media object:', media);
+                  console.log('Has base64Data:', !!media.base64Data);
+                  console.log('Has fallbackImage:', !!media.fallbackImage);
                   if (media.base64Data) {
-                    e.currentTarget.src = `data:image/jpeg;base64,${media.base64Data}`;
+                    e.currentTarget.src = media.base64Data;
+                  } else if (media.fallbackImage) {
+                    e.currentTarget.src = media.fallbackImage;
                   } else {
                     e.currentTarget.style.display = 'none';
                   }
@@ -129,8 +134,18 @@ export const InstagramStyleCitizenDashboard: React.FC<CitizenDashboardProps> = (
                 className="w-full h-auto max-h-96 object-cover rounded-lg"
                 onError={(e) => {
                   console.log('Video failed to load:', media.url);
+                  console.log('Video media object:', media);
+                  console.log('Has base64Data:', !!media.base64Data);
+                  console.log('Has fallbackImage:', !!media.fallbackImage);
                   if (media.base64Data) {
-                    e.currentTarget.src = `data:video/mp4;base64,${media.base64Data}`;
+                    e.currentTarget.src = media.base64Data;
+                  } else if (media.fallbackImage) {
+                    // For videos, show fallback image instead
+                    const videoElement = e.currentTarget;
+                    const parentDiv = videoElement.parentElement;
+                    if (parentDiv) {
+                      parentDiv.innerHTML = `<img src="${media.fallbackImage}" alt="Video not available" class="w-full h-auto max-h-96 object-cover rounded-lg" />`;
+                    }
                   } else {
                     e.currentTarget.style.display = 'none';
                   }
