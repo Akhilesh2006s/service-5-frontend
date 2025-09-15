@@ -307,6 +307,34 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
         >
           Test Post
         </Button>
+        <Button 
+          onClick={() => {
+            const testImagePost = {
+              id: Date.now(),
+              user: { name: user.name, avatar: '', role: user.role || 'citizen' },
+              content: 'Test image post with working URL! #test #image',
+              image: null,
+              video: null,
+              mediaFiles: [{
+                file: null,
+                url: 'https://picsum.photos/400/300?random=' + Date.now(),
+                type: 'image'
+              }],
+              hashtags: ['#test', '#image'],
+              location: 'Test Location',
+              status: 'pending',
+              assignedTo: null,
+              createdAt: 'Just now',
+              likes: 0,
+              comments: 0,
+              shares: 0
+            };
+            addPost(testImagePost);
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white ml-2"
+        >
+          Test Image Post
+        </Button>
       </div>
       
       <div className="grid gap-4">
@@ -556,15 +584,32 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
             });
           }
         } catch (error) {
-          console.warn('File upload error, using local URLs as fallback:', error);
-          // Fallback to local URLs
-          selectedFiles.forEach(file => {
-            if (file.type.startsWith('image/')) {
-              imageUrls.push(URL.createObjectURL(file));
-            } else if (file.type.startsWith('video/')) {
-              videoUrls.push(URL.createObjectURL(file));
+          console.warn('File upload error, converting to base64 for persistence:', error);
+          // Fallback to base64 for persistence
+          for (const file of selectedFiles) {
+            try {
+              const base64 = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              });
+              
+              if (file.type.startsWith('image/')) {
+                imageUrls.push(base64);
+              } else if (file.type.startsWith('video/')) {
+                videoUrls.push(base64);
+              }
+            } catch (base64Error) {
+              console.error('Error converting file to base64:', base64Error);
+              // Final fallback to blob URL
+              if (file.type.startsWith('image/')) {
+                imageUrls.push(URL.createObjectURL(file));
+              } else if (file.type.startsWith('video/')) {
+                videoUrls.push(URL.createObjectURL(file));
+              }
             }
-          });
+          }
         }
       }
 
