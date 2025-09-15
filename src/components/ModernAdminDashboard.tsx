@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { usePosts } from '@/contexts/PostsContext';
+import { useUsers } from '@/contexts/UsersContext';
 
 interface AdminDashboardProps {
   user: any;
@@ -25,10 +26,14 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentView, onViewChange }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddUserDialog, setShowAddUserDialog] = useState(false);
-  const [governmentOfficials, setGovernmentOfficials] = useState([]);
-  const [workers, setWorkers] = useState([]);
   const [loading, setLoading] = useState(false);
   const { posts } = usePosts();
+  const { governmentOfficials, workers, addGovernmentOfficial, addWorker } = useUsers();
+
+  // Debug logging
+  console.log('Admin Dashboard - Government Officials:', governmentOfficials);
+  console.log('Admin Dashboard - Workers:', workers);
+  console.log('Admin Dashboard - Current View:', currentView);
 
   // Calculate real analytics data from posts
   const analyticsData = {
@@ -42,74 +47,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
     citizens: posts.filter(p => p.user.role === 'citizen').length
   };
 
-  // Fetch data on component mount
-  useEffect(() => {
-    fetchGovernmentOfficials();
-    fetchWorkers();
-  }, []);
-
-  // Fetch government officials
-  const fetchGovernmentOfficials = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://service-5-backend-production.up.railway.app/api/users?role=government', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const officials = await response.json();
-        setGovernmentOfficials(officials);
-      }
-    } catch (error) {
-      console.error('Error fetching government officials:', error);
-    }
-  };
-
-  // Fetch workers
-  const fetchWorkers = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://service-5-backend-production.up.railway.app/api/workers', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const workersData = await response.json();
-        setWorkers(workersData);
-      }
-    } catch (error) {
-      console.error('Error fetching workers:', error);
-    }
-  };
-
   // Create government official
   const createGovernmentOfficial = async (userData: any) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://service-5-backend-production.up.railway.app/api/users', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...userData,
-          role: 'government'
-        })
-      });
-      
-      if (response.ok) {
-        const newOfficial = await response.json();
-        setGovernmentOfficials(prev => [...prev, newOfficial]);
-        return true;
-      }
-      return false;
+      addGovernmentOfficial(userData);
+      return true;
     } catch (error) {
       console.error('Error creating government official:', error);
       return false;
@@ -119,22 +61,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
   // Create worker
   const createWorker = async (workerData: any) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://service-5-backend-production.up.railway.app/api/workers', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(workerData)
-      });
-      
-      if (response.ok) {
-        const newWorker = await response.json();
-        setWorkers(prev => [...prev, newWorker]);
-        return true;
-      }
-      return false;
+      addWorker(workerData);
+      return true;
     } catch (error) {
       console.error('Error creating worker:', error);
       return false;
@@ -319,6 +247,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
         </Button>
       </div>
 
+      {/* Debug Info */}
+      <div className="p-4 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg mb-4">
+        <p className="text-sm font-medium">Debug Info:</p>
+        <p className="text-xs">Government Officials Count: {governmentOfficials.length}</p>
+        <p className="text-xs">Workers Count: {workers.length}</p>
+        <p className="text-xs">Current View: {currentView}</p>
+      </div>
+
       <div className="grid gap-4">
         {governmentOfficials.map((official) => (
           <Card key={official.id}>
@@ -381,6 +317,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
           <UserPlus className="h-4 w-4 mr-2" />
           Add Worker
         </Button>
+      </div>
+
+      {/* Debug Info */}
+      <div className="p-4 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg mb-4">
+        <p className="text-sm font-medium">Debug Info:</p>
+        <p className="text-xs">Government Officials Count: {governmentOfficials.length}</p>
+        <p className="text-xs">Workers Count: {workers.length}</p>
+        <p className="text-xs">Current View: {currentView}</p>
       </div>
 
       <div className="grid gap-4">
@@ -515,6 +459,7 @@ const AddUserForm: React.FC<{ onClose: () => void; onCreateUser: (userData: any)
     try {
       const success = await onCreateUser(formData);
       if (success) {
+        alert(`${formData.role === 'government' ? 'Government Official' : 'Worker'} created successfully!`);
         onClose();
         // Reset form
         setFormData({

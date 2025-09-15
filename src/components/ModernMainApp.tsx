@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { InstagramStyleCitizenDashboard } from './InstagramStyleCitizenDashboard';
 import { GovernmentOfficialDashboard } from './ModernGovernmentOfficialDashboard';
 import { WorkerDashboard } from './ModernWorkerDashboard';
-import { AdminDashboard } from './AdminDashboard';
+import { AdminDashboard } from './ModernAdminDashboard';
 
 interface ModernMainAppProps {
   user: any;
@@ -130,7 +130,7 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
         return <WorkerDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
       case 'admin':
         console.log('Rendering AdminDashboard');
-        return <AdminDashboard user={user} onLogout={onLogout} />;
+        return <AdminDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
       default:
         console.log('Rendering InstagramStyleCitizenDashboard (default)');
         return <InstagramStyleCitizenDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;

@@ -710,6 +710,7 @@ const CompletionPostForm: React.FC<{ task: any; user: any; onClose: () => void }
   const [postContent, setPostContent] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const { uploadMediaFiles } = usePosts();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -717,6 +718,14 @@ const CompletionPostForm: React.FC<{ task: any; user: any; onClose: () => void }
 
     setLoading(true);
     try {
+      // Upload media files using the media service
+      let uploadedMediaFiles = [];
+      if (selectedFiles.length > 0) {
+        console.log('Uploading completion media files:', selectedFiles);
+        uploadedMediaFiles = await uploadMediaFiles(selectedFiles);
+        console.log('Completion media files uploaded successfully:', uploadedMediaFiles);
+      }
+
       // Create a completion post
       const completionPost = {
         id: Date.now(),
@@ -735,8 +744,7 @@ const CompletionPostForm: React.FC<{ task: any; user: any; onClose: () => void }
         comments: 0,
         shares: 0,
         relatedTask: task.id,
-        completionImages: selectedFiles.filter(f => f.type.startsWith('image/')).map(f => URL.createObjectURL(f)),
-        completionVideos: selectedFiles.filter(f => f.type.startsWith('video/')).map(f => URL.createObjectURL(f))
+        mediaFiles: uploadedMediaFiles
       };
 
       // In a real app, this would be sent to the backend

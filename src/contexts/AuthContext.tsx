@@ -4,7 +4,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'citizen' | 'government';
+  role: 'citizen' | 'government' | 'worker' | 'admin';
   verified: boolean;
   aadhaarNumber?: string;
   location?: string;
@@ -25,7 +25,7 @@ interface RegisterData {
   name: string;
   email: string;
   password: string;
-  role: 'citizen' | 'government';
+  role: 'citizen' | 'government' | 'worker' | 'admin';
   aadhaarNumber?: string;
   location?: string;
   department?: string;
@@ -48,6 +48,22 @@ interface AuthProviderProps {
 
 const API_BASE_URL = 'https://service-5-backend-production.up.railway.app/api';
 
+// Helper function to get all local users from localStorage
+const getLocalUsers = () => {
+  try {
+    const officials = localStorage.getItem('local-gov-officials');
+    const workers = localStorage.getItem('local-gov-workers');
+    
+    const officialsList = officials ? JSON.parse(officials) : [];
+    const workersList = workers ? JSON.parse(workers) : [];
+    
+    return [...officialsList, ...workersList];
+  } catch (error) {
+    console.error('Error loading local users:', error);
+    return [];
+  }
+};
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -66,6 +82,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const fetchUserProfile = async (authToken: string) => {
     try {
+      // Check if it's a local token
+      if (authToken.startsWith('local_')) {
+        // Extract user ID from local token
+        const userId = authToken.split('_')[2];
+        const localUsers = getLocalUsers();
+        const localUser = localUsers.find(u => u.id.toString() === userId);
+        
+        if (localUser) {
+          const userData = {
+            id: localUser.id.toString(),
+            name: localUser.name,
+            email: localUser.email,
+            role: localUser.role,
+            verified: localUser.verified || true,
+            department: localUser.department,
+            designation: localUser.designation
+          };
+          setUser(userData);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Try backend API for non-local tokens
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -92,6 +132,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('Attempting login for:', email);
+      
+      // First, try to find user in localStorage (for newly created users)
+      const localUsers = getLocalUsers();
+      console.log('Local users found:', localUsers);
+      
+      const localUser = localUsers.find(u => u.email === email);
+      console.log('Local user found:', localUser);
+      
+      if (localUser) {
+        // For demo purposes, accept any password for local users
+        // In a real app, you'd hash and compare passwords
+        const userData = {
+          id: localUser.id.toString(),
+          name: localUser.name,
+          email: localUser.email,
+          role: localUser.role,
+          verified: localUser.verified || true,
+          department: localUser.department,
+          designation: localUser.designation
+        };
+        
+        const demoToken = `local_${Date.now()}_${localUser.id}`;
+        console.log('Login successful with local user:', userData);
+        setToken(demoToken);
+        setUser(userData);
+        localStorage.setItem('token', demoToken);
+        return;
+      }
+
+      // If not found locally, try backend API
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {

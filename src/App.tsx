@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PostsProvider } from "@/contexts/PostsContext";
+import { UsersProvider } from "@/contexts/UsersContext";
 import Index from "./pages/NewIndex";
 import NotFound from "./pages/NotFound";
 
@@ -25,11 +26,13 @@ const App = () => (
             <BrowserRouter>
               <AuthProvider>
                 <PostsProvider>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
+                  <UsersProvider>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </UsersProvider>
                 </PostsProvider>
               </AuthProvider>
             </BrowserRouter>

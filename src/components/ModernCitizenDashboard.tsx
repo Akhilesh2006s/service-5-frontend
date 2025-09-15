@@ -14,6 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { FileUpload } from './FileUpload';
+import { CreatePostForm } from './CreatePostForm';
 import { usePosts } from '@/contexts/PostsContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -500,14 +501,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
   );
 };
 
-// Create Post Form Component
-const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: (post: any) => void }> = ({ user, onClose, onPostCreated }) => {
-  const [content, setContent] = useState('');
-  const [hashtags, setHashtags] = useState('');
-  const [location, setLocation] = useState('');
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { token } = useAuth();
+// Old CreatePostForm removed - using imported version
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -520,37 +514,20 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
     setLoading(true);
     
     try {
-    // Extract hashtags from content and hashtags field
-    const allHashtags = [...new Set([
-      ...content.match(/#\w+/g) || [],
-      ...hashtags.split(' ').filter(tag => tag.startsWith('#'))
-    ])];
+      // Extract hashtags from content and hashtags field
+      const allHashtags = [...new Set([
+        ...content.match(/#\w+/g) || [],
+        ...hashtags.split(' ').filter(tag => tag.startsWith('#'))
+      ])];
 
-      // Upload files to backend first
-      let imageUrls = [];
-      let videoUrls = [];
+      // Upload files using the media service
+      let uploadedMediaFiles = [];
       
       if (selectedFiles.length > 0) {
-        console.log('Uploading files to backend:', selectedFiles);
-        try {
-          const formData = new FormData();
-          selectedFiles.forEach(file => {
-            formData.append('files', file);
-          });
-
-          const uploadResponse = await fetch('https://service-5-backend-production.up.railway.app/api/upload/multiple', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-            body: formData,
-          });
-
-          console.log('Upload response status:', uploadResponse.status);
-          console.log('Upload response ok:', uploadResponse.ok);
-
-          if (uploadResponse.ok) {
-            const uploadData = await uploadResponse.json();
+        console.log('Uploading files using media service:', selectedFiles);
+        uploadedMediaFiles = await uploadMediaFiles(selectedFiles);
+        console.log('Media files uploaded successfully:', uploadedMediaFiles);
+      }
             console.log('Files uploaded successfully:', uploadData);
             
             // Separate images and videos

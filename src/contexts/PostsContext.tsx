@@ -1,10 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { mediaService, MediaFile as ServiceMediaFile } from '@/services/mediaService';
 import { useAuth } from './AuthContext';
 
 interface MediaFile {
-  file: File | null;
+  id?: string;
+  file?: File | null;
   url: string;
   type: 'image' | 'video';
+  filename?: string;
+  size?: number;
+  uploadedAt?: string;
 }
 
 interface Post {
@@ -27,6 +32,11 @@ interface Post {
   assignedWorker?: string | null;
   priority?: 'low' | 'medium' | 'high';
   notes?: string;
+  department?: string;
+  completedAt?: string;
+  completedBy?: string;
+  workDone?: string;
+  timeSpent?: string;
   createdAt: string;
   likes: number;
   comments: number;
@@ -44,6 +54,7 @@ interface PostsContextType {
   error: string | null;
   refreshPosts: () => Promise<void>;
   savePostsToLocalStorage: () => void;
+  uploadMediaFiles: (files: File[]) => Promise<MediaFile[]>;
 }
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
@@ -688,6 +699,23 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
     }
   };
 
+  const uploadMediaFiles = async (files: File[]): Promise<MediaFile[]> => {
+    try {
+      const result = await mediaService.convertLocalToBackend(files);
+      return result;
+    } catch (error) {
+      console.error('Error uploading media files:', error);
+      // Fallback to local URLs
+      return files.map(file => ({
+        url: URL.createObjectURL(file),
+        type: file.type.startsWith('image/') ? 'image' : 'video',
+        filename: file.name,
+        size: file.size,
+        uploadedAt: new Date().toISOString()
+      }));
+    }
+  };
+
   return (
     <PostsContext.Provider value={{ 
       posts, 
@@ -699,7 +727,8 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       loading, 
       error, 
       refreshPosts,
-      savePostsToLocalStorage
+      savePostsToLocalStorage,
+      uploadMediaFiles
     }}>
       {children}
     </PostsContext.Provider>
