@@ -505,7 +505,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
           {selectedPost && (
             <AssignWorkerForm 
               post={selectedPost} 
-              workers={mockWorkers}
+              workers={workers}
               onClose={() => setShowAssignDialog(false)}
               onUpdatePost={updatePost}
             />
