@@ -406,6 +406,46 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
         ...hashtags.split(' ').filter(tag => tag.startsWith('#'))
       ])];
 
+      // Upload files first if any
+      let imageUrls = [];
+      let videoUrls = [];
+      
+      if (selectedFiles.length > 0) {
+        try {
+          const formData = new FormData();
+          selectedFiles.forEach(file => {
+            formData.append('files', file);
+          });
+
+          const uploadResponse = await fetch('https://service-5-backend-production.up.railway.app/api/upload/multiple', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+          });
+
+          if (uploadResponse.ok) {
+            const uploadData = await uploadResponse.json();
+            console.log('Files uploaded:', uploadData);
+            
+            // Separate images and videos
+            uploadData.files.forEach((file: any) => {
+              const fullUrl = `https://service-5-backend-production.up.railway.app${file.fileUrl}`;
+              if (file.mimetype.startsWith('image/')) {
+                imageUrls.push(fullUrl);
+              } else if (file.mimetype.startsWith('video/')) {
+                videoUrls.push(fullUrl);
+              }
+            });
+          } else {
+            console.warn('File upload failed, continuing without files');
+          }
+        } catch (error) {
+          console.warn('File upload error:', error);
+        }
+      }
+
       // Prepare data for backend (using title and description as required by backend)
       const postData = {
         title: content.substring(0, 100), // Use first 100 chars as title
@@ -414,8 +454,8 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
         priority: 'medium',
         location: location,
         department: 'general',
-        images: [], // Will handle file uploads later
-        videos: []
+        images: imageUrls,
+        videos: videoUrls
       };
 
       console.log('Sending post to backend:', postData);
