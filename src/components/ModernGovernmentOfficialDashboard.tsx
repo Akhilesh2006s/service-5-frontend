@@ -253,11 +253,14 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                           onLoad={() => console.log('Image loaded successfully:', media.url)}
                           onError={(e) => {
                             console.error('Error loading image:', media.url);
+                            console.log('Media object:', media);
+                            console.log('Has base64Data:', !!media.base64Data);
                             // Try base64 fallback if available
                             if (media.base64Data) {
                               console.log('Using base64 fallback for image');
                               (e.target as HTMLImageElement).src = media.base64Data;
                             } else {
+                              console.log('No base64 fallback available, hiding image');
                               (e.target as HTMLImageElement).style.display = 'none';
                             }
                           }}
@@ -270,11 +273,14 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                           onLoadStart={() => console.log('Video loading started:', media.url)}
                           onError={(e) => {
                             console.error('Error loading video:', media.url);
+                            console.log('Video media object:', media);
+                            console.log('Has base64Data:', !!media.base64Data);
                             // Try base64 fallback if available
                             if (media.base64Data) {
                               console.log('Using base64 fallback for video');
                               (e.target as HTMLVideoElement).src = media.base64Data;
                             } else {
+                              console.log('No base64 fallback available, hiding video');
                               (e.target as HTMLVideoElement).style.display = 'none';
                             }
                           }}

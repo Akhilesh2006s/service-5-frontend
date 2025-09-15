@@ -77,6 +77,76 @@ export const MediaTestComponent: React.FC = () => {
     setLoading(false);
   };
 
+  const createTestPostWithBase64 = async () => {
+    setLoading(true);
+    try {
+      // Create a simple test image in base64
+      const testImageBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+      
+      const testPost = {
+        title: 'Test Post with Base64 Image',
+        description: 'This is a test post to verify base64 fallback works',
+        content: 'This is a test post to verify base64 fallback works',
+        location: 'Test Location',
+        priority: 'medium',
+        department: 'Public Works',
+        category: 'infrastructure',
+        images: [{
+          url: 'https://service-5-backend-production.up.railway.app/uploads/nonexistent-file.png', // This will fail
+          base64Data: testImageBase64 // This should be used as fallback
+        }],
+        videos: [],
+        user: {
+          name: 'Test User',
+          email: 'test@example.com'
+        },
+        createdAt: new Date().toISOString(),
+        likes: 0,
+        comments: 0,
+        status: 'pending'
+      };
+
+      const response = await fetch('https://service-5-backend-production.up.railway.app/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(testPost)
+      });
+
+      if (response.ok) {
+        const newPost = await response.json();
+        results.push({
+          endpoint: 'Create Test Post',
+          status: response.status,
+          ok: response.ok,
+          data: { message: 'Test post created successfully', postId: newPost._id },
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        results.push({
+          endpoint: 'Create Test Post',
+          status: response.status,
+          ok: false,
+          error: 'Failed to create test post',
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      results.push({
+        endpoint: 'Create Test Post',
+        status: 'ERROR',
+        ok: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    setTestResults(results);
+    setLoading(false);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <Card>
@@ -90,6 +160,9 @@ export const MediaTestComponent: React.FC = () => {
             </Button>
             <Button onClick={testBackendEndpoints} disabled={loading}>
               {loading ? 'Testing...' : 'Test Backend Endpoints'}
+            </Button>
+            <Button onClick={createTestPostWithBase64} disabled={loading}>
+              {loading ? 'Creating...' : 'Create Test Post with Base64'}
             </Button>
           </div>
 
