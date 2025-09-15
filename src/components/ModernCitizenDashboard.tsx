@@ -125,10 +125,10 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Badge className={cn("text-xs", getStatusColor(post.status))}>
-                    {getStatusIcon(post.status)}
-                    <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
-                  </Badge>
+                <Badge className={cn("text-xs", getStatusColor(post.status))}>
+                  {getStatusIcon(post.status)}
+                  <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
+                </Badge>
                   {(() => {
                     console.log('Checking delete visibility:', {
                       postAuthor: post.user.name,
@@ -347,7 +347,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                   <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
                 </Badge>
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm text-muted-foreground">{post.createdAt}</span>
+                <span className="text-sm text-muted-foreground">{post.createdAt}</span>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -525,11 +525,11 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
     setLoading(true);
     
     try {
-      // Extract hashtags from content and hashtags field
-      const allHashtags = [...new Set([
-        ...content.match(/#\w+/g) || [],
-        ...hashtags.split(' ').filter(tag => tag.startsWith('#'))
-      ])];
+    // Extract hashtags from content and hashtags field
+    const allHashtags = [...new Set([
+      ...content.match(/#\w+/g) || [],
+      ...hashtags.split(' ').filter(tag => tag.startsWith('#'))
+    ])];
 
       // Upload files to backend first
       let imageUrls = [];
@@ -753,14 +753,14 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
         }
       } else {
         // Fallback for unauthenticated users
-        const newPost = {
+    const newPost = {
           id: Date.now(),
-          user: { 
-            name: user.name, 
-            avatar: user.avatar || '', 
-            role: user.role || 'citizen' 
-          },
-          content: content,
+      user: { 
+        name: user.name, 
+        avatar: user.avatar || '', 
+        role: user.role || 'citizen' 
+      },
+      content: content,
           image: null,
           video: null,
           mediaFiles: await Promise.all(selectedFiles.map(async (file) => {
@@ -770,38 +770,38 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
               reader.onload = () => {
                 console.log('Created base64 mediaFile for unauthenticated user:', file.name);
                 resolve({
-                  file: file,
+        file: file,
                   url: reader.result as string,
-                  type: file.type.startsWith('image/') ? 'image' : 'video'
+        type: file.type.startsWith('image/') ? 'image' : 'video'
                 });
               };
               reader.readAsDataURL(file);
             });
-          })),
-          hashtags: allHashtags,
-          location: location,
-          status: 'pending',
-          assignedTo: null,
-          createdAt: 'Just now',
-          likes: 0,
-          comments: 0,
-          shares: 0
-        };
+      })),
+      hashtags: allHashtags,
+      location: location,
+      status: 'pending',
+      assignedTo: null,
+      createdAt: 'Just now',
+      likes: 0,
+      comments: 0,
+      shares: 0
+    };
 
         console.log('Creating local post (no auth):', newPost);
-        onPostCreated(newPost);
+    onPostCreated(newPost);
       }
     } catch (error) {
       console.error('Error creating post:', error);
       alert('Failed to create post. Please try again.');
     } finally {
       setLoading(false);
-      
-      // Reset form
-      setContent('');
-      setHashtags('');
-      setLocation('');
-      setSelectedFiles([]);
+    
+    // Reset form
+    setContent('');
+    setHashtags('');
+    setLocation('');
+    setSelectedFiles([]);
     }
   };
 

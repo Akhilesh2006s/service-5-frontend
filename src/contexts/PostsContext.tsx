@@ -199,9 +199,9 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       setError(err instanceof Error ? err.message : 'Failed to fetch posts');
       
       // Fallback to localStorage if API fails
-      try {
-        const stored = localStorage.getItem('local-gov-posts');
-        if (stored) {
+  try {
+    const stored = localStorage.getItem('local-gov-posts');
+    if (stored) {
           const fallbackPosts = JSON.parse(stored);
           setPosts(fallbackPosts);
           console.log('Using fallback posts from localStorage:', fallbackPosts.length);

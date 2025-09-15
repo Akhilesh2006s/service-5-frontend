@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Clock, Camera, Video, Upload, User, MapPin, Calendar, AlertCircle, FileText } from 'lucide-react';
+import { CheckCircle, Clock, Camera, Video, Upload, User, MapPin, Calendar, AlertCircle, FileText, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -119,7 +119,7 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ worker, onLogo
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -149,6 +149,21 @@ export const WorkerDashboard: React.FC<WorkerDashboardProps> = ({ worker, onLogo
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">Pending Review</p>
                   <p className="text-2xl font-semibold text-gray-900">{completedTasks.filter(t => t.status === 'completed').length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <TrendingUp className="h-8 w-8 text-purple-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-500">Success Rate</p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {assignedTasks.length + completedTasks.length > 0 
+                      ? Math.round((completedTasks.length / (assignedTasks.length + completedTasks.length)) * 100)
+                      : 0}%
+                  </p>
                 </div>
               </div>
             </CardContent>

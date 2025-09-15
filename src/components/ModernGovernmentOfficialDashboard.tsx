@@ -33,6 +33,14 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
 
   const [workers, setWorkers] = useState([]);
   const [workersLoading, setWorkersLoading] = useState(false);
+  const [statistics, setStatistics] = useState({
+    totalPosts: 0,
+    assignedPosts: 0,
+    completedPosts: 0,
+    pendingPosts: 0,
+    totalWorkers: 0,
+    activeWorkers: 0
+  });
 
   const departments = ['Public Works', 'Road Maintenance', 'Sanitation', 'Parks & Recreation', 'Utilities'];
 
@@ -40,6 +48,19 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
   useEffect(() => {
     fetchWorkers();
   }, []);
+
+  // Calculate statistics
+  useEffect(() => {
+    const stats = {
+      totalPosts: posts.length,
+      assignedPosts: posts.filter(p => p.status === 'assigned').length,
+      completedPosts: posts.filter(p => p.status === 'completed').length,
+      pendingPosts: posts.filter(p => p.status === 'pending').length,
+      totalWorkers: workers.length,
+      activeWorkers: workers.filter(w => w.status === 'available').length
+    };
+    setStatistics(stats);
+  }, [posts, workers]);
 
   // Fetch workers from backend
   const fetchWorkers = async () => {
@@ -653,6 +674,81 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
             />
           </div>
         </div>
+      </div>
+
+      {/* Statistics Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <FileText className="h-8 w-8 text-blue-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">Total Posts</p>
+                <p className="text-2xl font-semibold text-gray-900">{statistics.totalPosts}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Clock className="h-8 w-8 text-yellow-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">Pending</p>
+                <p className="text-2xl font-semibold text-gray-900">{statistics.pendingPosts}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Users className="h-8 w-8 text-blue-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">Assigned</p>
+                <p className="text-2xl font-semibold text-gray-900">{statistics.assignedPosts}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <CheckCircle className="h-8 w-8 text-green-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">Completed</p>
+                <p className="text-2xl font-semibold text-gray-900">{statistics.completedPosts}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <User className="h-8 w-8 text-purple-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">Total Workers</p>
+                <p className="text-2xl font-semibold text-gray-900">{statistics.totalWorkers}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <CheckCircle className="h-8 w-8 text-green-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-500">Active Workers</p>
+                <p className="text-2xl font-semibold text-gray-900">{statistics.activeWorkers}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {renderCurrentView()}

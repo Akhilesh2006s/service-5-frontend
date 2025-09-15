@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 // Import role-specific dashboards
-import { CitizenDashboard } from './ModernCitizenDashboard';
+import { InstagramStyleCitizenDashboard } from './InstagramStyleCitizenDashboard';
 import { GovernmentOfficialDashboard } from './ModernGovernmentOfficialDashboard';
 import { WorkerDashboard } from './WorkerDashboard';
 import { AdminDashboard } from './AdminDashboard';
@@ -116,8 +116,8 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
     console.log('ModernMainApp - User role:', user.role, 'User object:', user);
     switch (user.role) {
       case 'citizen':
-        console.log('Rendering CitizenDashboard');
-        return <CitizenDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
+        console.log('Rendering InstagramStyleCitizenDashboard');
+        return <InstagramStyleCitizenDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
       case 'government_official':
         console.log('Rendering GovernmentOfficialDashboard');
         return <GovernmentOfficialDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
@@ -131,8 +131,8 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
         console.log('Rendering AdminDashboard');
         return <AdminDashboard user={user} onLogout={onLogout} />;
       default:
-        console.log('Rendering CitizenDashboard (default)');
-        return <CitizenDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
+        console.log('Rendering InstagramStyleCitizenDashboard (default)');
+        return <InstagramStyleCitizenDashboard user={user} currentView={currentView} onViewChange={setCurrentView} />;
     }
   };
 
