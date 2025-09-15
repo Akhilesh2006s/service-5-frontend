@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, CheckCircle, AlertCircle, Clock, MapPin, Hash, Filter, Search, UserPlus, FileText, BarChart3, MessageCircle, Heart, Share2, MoreVertical, Edit, Eye, MessageSquare, Plus, Trash2, Mail, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,21 +31,88 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const { posts, updatePost, likePost, addComment } = usePosts();
 
-  const [workers, setWorkers] = useState([
-    { id: 1, name: 'Mike Johnson', email: 'mike.johnson@city.gov', phone: '+1-555-0101', department: 'Road Maintenance', status: 'available', avatar: '', designation: 'Senior Technician' },
-    { id: 2, name: 'Sarah Davis', email: 'sarah.davis@city.gov', phone: '+1-555-0102', department: 'Sanitation', status: 'busy', avatar: '', designation: 'Field Supervisor' },
-    { id: 3, name: 'Tom Wilson', email: 'tom.wilson@city.gov', phone: '+1-555-0103', department: 'Public Works', status: 'available', avatar: '', designation: 'Maintenance Worker' },
-    { id: 4, name: 'Lisa Brown', email: 'lisa.brown@city.gov', phone: '+1-555-0104', department: 'Public Works', status: 'available', avatar: '', designation: 'Equipment Operator' }
-  ]);
+  const [workers, setWorkers] = useState([]);
+  const [workersLoading, setWorkersLoading] = useState(false);
 
   const departments = ['Public Works', 'Road Maintenance', 'Sanitation', 'Parks & Recreation', 'Utilities'];
 
-  const handleAddWorker = (newWorker: any) => {
-    setWorkers(prev => [...prev, newWorker]);
+  // Fetch workers on component mount
+  useEffect(() => {
+    fetchWorkers();
+  }, []);
+
+  // Fetch workers from backend
+  const fetchWorkers = async () => {
+    setWorkersLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://service-5-backend-production.up.railway.app/api/workers', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const workersData = await response.json();
+        setWorkers(workersData);
+        console.log('Workers fetched from backend:', workersData);
+      } else {
+        console.error('Failed to fetch workers:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching workers:', error);
+    } finally {
+      setWorkersLoading(false);
+    }
   };
 
-  const handleDeleteWorker = (workerId: number) => {
-    setWorkers(prev => prev.filter(worker => worker.id !== workerId));
+  // Add worker to backend
+  const handleAddWorker = async (newWorker: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://service-5-backend-production.up.railway.app/api/workers', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newWorker)
+      });
+      
+      if (response.ok) {
+        const createdWorker = await response.json();
+        setWorkers(prev => [...prev, createdWorker]);
+        console.log('Worker created successfully:', createdWorker);
+      } else {
+        console.error('Failed to create worker:', response.status);
+      }
+    } catch (error) {
+      console.error('Error creating worker:', error);
+    }
+  };
+
+  // Delete worker from backend
+  const handleDeleteWorker = async (workerId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`https://service-5-backend-production.up.railway.app/api/workers/${workerId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        setWorkers(prev => prev.filter(worker => worker.id !== workerId));
+        console.log('Worker deleted successfully');
+      } else {
+        console.error('Failed to delete worker:', response.status);
+      }
+    } catch (error) {
+      console.error('Error deleting worker:', error);
+    }
   };
 
   const getStatusColor = (status: string) => {
