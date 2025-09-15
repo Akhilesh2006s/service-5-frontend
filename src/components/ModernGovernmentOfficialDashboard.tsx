@@ -231,7 +231,13 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                           onLoad={() => console.log('Image loaded successfully:', media.url)}
                           onError={(e) => {
                             console.error('Error loading image:', media.url);
-                            (e.target as HTMLImageElement).style.display = 'none';
+                            // Try base64 fallback if available
+                            if (media.base64Data) {
+                              console.log('Using base64 fallback for image');
+                              (e.target as HTMLImageElement).src = media.base64Data;
+                            } else {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }
                           }}
                         />
                       ) : media.type === 'video' ? (
@@ -242,7 +248,13 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                           onLoadStart={() => console.log('Video loading started:', media.url)}
                           onError={(e) => {
                             console.error('Error loading video:', media.url);
-                            (e.target as HTMLVideoElement).style.display = 'none';
+                            // Try base64 fallback if available
+                            if (media.base64Data) {
+                              console.log('Using base64 fallback for video');
+                              (e.target as HTMLVideoElement).src = media.base64Data;
+                            } else {
+                              (e.target as HTMLVideoElement).style.display = 'none';
+                            }
                           }}
                         />
                       ) : (
