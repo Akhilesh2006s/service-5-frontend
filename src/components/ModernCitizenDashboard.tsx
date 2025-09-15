@@ -573,21 +573,51 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
             const errorText = await uploadResponse.text();
             console.error('File upload failed with status:', uploadResponse.status);
             console.error('Upload error response:', errorText);
-            console.warn('File upload failed, converting to base64 for persistence');
-            // Fallback to base64 for persistence
+            console.warn('File upload failed, converting to compressed base64 for persistence');
+            // Fallback to compressed base64 for persistence
             for (const file of selectedFiles) {
               try {
-                const base64 = await new Promise<string>((resolve, reject) => {
-                  const reader = new FileReader();
-                  reader.onload = () => resolve(reader.result as string);
-                  reader.onerror = reject;
-                  reader.readAsDataURL(file);
-                });
-                
+                // Compress image before converting to base64
                 if (file.type.startsWith('image/')) {
-                  imageUrls.push(base64);
+                  const compressedBase64 = await new Promise<string>((resolve, reject) => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const img = new Image();
+                    
+                    img.onload = () => {
+                      // Resize image to max 800px width/height
+                      const maxSize = 800;
+                      let { width, height } = img;
+                      
+                      if (width > height) {
+                        if (width > maxSize) {
+                          height = (height * maxSize) / width;
+                          width = maxSize;
+                        }
+                      } else {
+                        if (height > maxSize) {
+                          width = (width * maxSize) / height;
+                          height = maxSize;
+                        }
+                      }
+                      
+                      canvas.width = width;
+                      canvas.height = height;
+                      
+                      // Draw and compress
+                      ctx?.drawImage(img, 0, 0, width, height);
+                      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // 70% quality
+                      resolve(compressedDataUrl);
+                    };
+                    
+                    img.onerror = reject;
+                    img.src = URL.createObjectURL(file);
+                  });
+                  
+                  imageUrls.push(compressedBase64);
                 } else if (file.type.startsWith('video/')) {
-                  videoUrls.push(base64);
+                  // For videos, use a placeholder or skip for now
+                  console.warn('Video compression not implemented, skipping video');
                 }
               } catch (base64Error) {
                 console.error('Error converting file to base64:', base64Error);
@@ -601,21 +631,51 @@ const CreatePostForm: React.FC<{ user: any; onClose: () => void; onPostCreated: 
             }
           }
         } catch (error) {
-          console.warn('File upload error, converting to base64 for persistence:', error);
-          // Fallback to base64 for persistence
+          console.warn('File upload error, converting to compressed base64 for persistence:', error);
+          // Fallback to compressed base64 for persistence
           for (const file of selectedFiles) {
             try {
-              const base64 = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result as string);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-              });
-              
+              // Compress image before converting to base64
               if (file.type.startsWith('image/')) {
-                imageUrls.push(base64);
+                const compressedBase64 = await new Promise<string>((resolve, reject) => {
+                  const canvas = document.createElement('canvas');
+                  const ctx = canvas.getContext('2d');
+                  const img = new Image();
+                  
+                  img.onload = () => {
+                    // Resize image to max 800px width/height
+                    const maxSize = 800;
+                    let { width, height } = img;
+                    
+                    if (width > height) {
+                      if (width > maxSize) {
+                        height = (height * maxSize) / width;
+                        width = maxSize;
+                      }
+                    } else {
+                      if (height > maxSize) {
+                        width = (width * maxSize) / height;
+                        height = maxSize;
+                      }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // Draw and compress
+                    ctx?.drawImage(img, 0, 0, width, height);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // 70% quality
+                    resolve(compressedDataUrl);
+                  };
+                  
+                  img.onerror = reject;
+                  img.src = URL.createObjectURL(file);
+                });
+                
+                imageUrls.push(compressedBase64);
               } else if (file.type.startsWith('video/')) {
-                videoUrls.push(base64);
+                // For videos, use a placeholder or skip for now
+                console.warn('Video compression not implemented, skipping video');
               }
             } catch (base64Error) {
               console.error('Error converting file to base64:', base64Error);
