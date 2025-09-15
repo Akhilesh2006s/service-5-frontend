@@ -29,6 +29,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [showAddWorkerDialog, setShowAddWorkerDialog] = useState(false);
+  const [showReviewDetailsDialog, setShowReviewDetailsDialog] = useState(false);
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const { posts, updatePost, likePost, addComment, refreshPosts } = usePosts();
 
@@ -648,7 +649,14 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
               </div>
               
               <div className="mt-4 flex justify-end space-x-2">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setSelectedPost(post);
+                    setShowReviewDetailsDialog(true);
+                  }}
+                >
                   <FileText className="h-4 w-4 mr-2" />
                   View Details
                 </Button>
@@ -874,6 +882,28 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
               onClose={() => setShowAddWorkerDialog(false)}
               onAddWorker={handleAddWorker}
             />
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Review Work Details Dialog */}
+      <Dialog open={showReviewDetailsDialog} onOpenChange={setShowReviewDetailsDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Work Review Details</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+            {selectedPost && (
+              <WorkReviewDetails 
+                post={selectedPost} 
+                onClose={() => setShowReviewDetailsDialog(false)}
+                onApprove={() => {
+                  // Handle approval logic here
+                  console.log('Approving work for post:', selectedPost.id);
+                  setShowReviewDetailsDialog(false);
+                }}
+              />
+            )}
           </ScrollArea>
         </DialogContent>
       </Dialog>
@@ -1223,5 +1253,165 @@ const AddWorkerForm: React.FC<{ onClose: () => void; onAddWorker: (worker: any) 
         </Button>
       </div>
     </form>
+  );
+};
+
+// Work Review Details Component
+const WorkReviewDetails: React.FC<{ post: any; onClose: () => void; onApprove: () => void }> = ({ post, onClose, onApprove }) => {
+  // Mock data for worker's submitted work - in a real app, this would come from the backend
+  const workerSubmission = {
+    workDescription: "Fixed the street light on Main Street. Replaced the faulty bulb and cleaned the fixture. The light is now working properly and provides adequate illumination for pedestrians.",
+    timeSpent: "2 hours 30 minutes",
+    completionDate: "9/15/2025, 3:02:33 PM",
+    workerRemarks: "The issue was a burnt-out LED bulb. Replaced it with a new energy-efficient LED bulb. Also cleaned the fixture to improve light output.",
+    submittedPhotos: [
+      "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500",
+      "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=500"
+    ],
+    submittedVideos: [
+      "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4"
+    ],
+    materialsUsed: ["LED Bulb (15W)", "Cleaning supplies", "Ladder"],
+    cost: "$25.50"
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Original Task Information */}
+      <div className="p-4 bg-muted/50 rounded-lg">
+        <h3 className="font-semibold mb-3">Original Task</h3>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p><span className="font-medium">Task ID:</span> {post.id}</p>
+            <p><span className="font-medium">Location:</span> {post.location}</p>
+            <p><span className="font-medium">Priority:</span> {post.priority}</p>
+            <p><span className="font-medium">Created:</span> {post.createdAt}</p>
+          </div>
+          <div>
+            <p><span className="font-medium">Reported by:</span> {post.user.name}</p>
+            <p><span className="font-medium">Assigned to:</span> {post.assignedTo || 'Unknown'}</p>
+            <p><span className="font-medium">Status:</span> {post.status}</p>
+          </div>
+        </div>
+        <div className="mt-3">
+          <p className="font-medium">Description:</p>
+          <p className="text-sm text-muted-foreground">{post.content}</p>
+        </div>
+      </div>
+
+      {/* Worker's Submission */}
+      <div className="space-y-4">
+        <h3 className="font-semibold">Worker's Submission</h3>
+        
+        {/* Work Description */}
+        <div>
+          <h4 className="font-medium mb-2">Work Completed</h4>
+          <p className="text-sm text-muted-foreground p-3 bg-muted/30 rounded-lg">
+            {workerSubmission.workDescription}
+          </p>
+        </div>
+
+        {/* Worker Remarks */}
+        <div>
+          <h4 className="font-medium mb-2">Worker Remarks</h4>
+          <p className="text-sm text-muted-foreground p-3 bg-muted/30 rounded-lg">
+            {workerSubmission.workerRemarks}
+          </p>
+        </div>
+
+        {/* Work Details */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <h4 className="font-medium mb-2">Time Spent</h4>
+            <p className="text-sm text-muted-foreground">{workerSubmission.timeSpent}</p>
+          </div>
+          <div>
+            <h4 className="font-medium mb-2">Completion Date</h4>
+            <p className="text-sm text-muted-foreground">{workerSubmission.completionDate}</p>
+          </div>
+          <div>
+            <h4 className="font-medium mb-2">Materials Used</h4>
+            <ul className="text-sm text-muted-foreground">
+              {workerSubmission.materialsUsed.map((material, index) => (
+                <li key={index}>• {material}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-medium mb-2">Cost</h4>
+            <p className="text-sm text-muted-foreground">{workerSubmission.cost}</p>
+          </div>
+        </div>
+
+        {/* Submitted Photos */}
+        {workerSubmission.submittedPhotos && workerSubmission.submittedPhotos.length > 0 && (
+          <div>
+            <h4 className="font-medium mb-3">Photos Submitted by Worker</h4>
+            <div className="grid grid-cols-2 gap-4">
+              {workerSubmission.submittedPhotos.map((photo, index) => (
+                <div key={index} className="rounded-lg overflow-hidden">
+                  <img 
+                    src={photo} 
+                    alt={`Work photo ${index + 1}`} 
+                    className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => window.open(photo, '_blank')}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Submitted Videos */}
+        {workerSubmission.submittedVideos && workerSubmission.submittedVideos.length > 0 && (
+          <div>
+            <h4 className="font-medium mb-3">Videos Submitted by Worker</h4>
+            <div className="space-y-4">
+              {workerSubmission.submittedVideos.map((video, index) => (
+                <div key={index} className="rounded-lg overflow-hidden">
+                  <video
+                    src={video}
+                    controls
+                    className="w-full h-64 object-cover"
+                    preload="metadata"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex justify-end space-x-2 pt-4 border-t">
+        <Button variant="outline" onClick={onClose}>
+          Close
+        </Button>
+        <Button 
+          variant="outline" 
+          className="text-red-600 hover:text-red-700"
+          onClick={() => {
+            if (confirm('Are you sure you want to reject this work?')) {
+              console.log('Rejecting work for post:', post.id);
+              onClose();
+            }
+          }}
+        >
+          Reject
+        </Button>
+        <Button 
+          onClick={() => {
+            if (confirm('Are you sure you want to approve this work?')) {
+              onApprove();
+            }
+          }}
+        >
+          <CheckCircle className="h-4 w-4 mr-2" />
+          Approve Work
+        </Button>
+      </div>
+    </div>
   );
 };
