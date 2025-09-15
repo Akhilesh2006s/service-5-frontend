@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, CheckCircle, AlertCircle, Clock, MapPin, Hash, Filter, Search, UserPlus, FileText, BarChart3, MessageCircle, Heart, Share2, MoreVertical, Edit, Eye, MessageSquare } from 'lucide-react';
+import { Users, CheckCircle, AlertCircle, Clock, MapPin, Hash, Filter, Search, UserPlus, FileText, BarChart3, MessageCircle, Heart, Share2, MoreVertical, Edit, Eye, MessageSquare, Plus, Trash2, Mail, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,17 +27,26 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [showAddWorkerDialog, setShowAddWorkerDialog] = useState(false);
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const { posts, updatePost, likePost, addComment } = usePosts();
 
-  const mockWorkers = [
-    { id: 1, name: 'Mike Johnson', department: 'Road Maintenance', status: 'available', avatar: '' },
-    { id: 2, name: 'Sarah Davis', department: 'Sanitation', status: 'busy', avatar: '' },
-    { id: 3, name: 'Tom Wilson', department: 'Public Works', status: 'available', avatar: '' },
-    { id: 4, name: 'Lisa Brown', department: 'Public Works', status: 'available', avatar: '' }
-  ];
+  const [workers, setWorkers] = useState([
+    { id: 1, name: 'Mike Johnson', email: 'mike.johnson@city.gov', phone: '+1-555-0101', department: 'Road Maintenance', status: 'available', avatar: '', designation: 'Senior Technician' },
+    { id: 2, name: 'Sarah Davis', email: 'sarah.davis@city.gov', phone: '+1-555-0102', department: 'Sanitation', status: 'busy', avatar: '', designation: 'Field Supervisor' },
+    { id: 3, name: 'Tom Wilson', email: 'tom.wilson@city.gov', phone: '+1-555-0103', department: 'Public Works', status: 'available', avatar: '', designation: 'Maintenance Worker' },
+    { id: 4, name: 'Lisa Brown', email: 'lisa.brown@city.gov', phone: '+1-555-0104', department: 'Public Works', status: 'available', avatar: '', designation: 'Equipment Operator' }
+  ]);
 
   const departments = ['Public Works', 'Road Maintenance', 'Sanitation', 'Parks & Recreation', 'Utilities'];
+
+  const handleAddWorker = (newWorker: any) => {
+    setWorkers(prev => [...prev, newWorker]);
+  };
+
+  const handleDeleteWorker = (workerId: number) => {
+    setWorkers(prev => prev.filter(worker => worker.id !== workerId));
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -394,6 +403,69 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
     </div>
   );
 
+  const renderManageWorkers = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Manage Workers</h2>
+        <Button onClick={() => setShowAddWorkerDialog(true)} className="bg-blue-600 hover:bg-blue-700">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Worker
+        </Button>
+      </div>
+      
+      <div className="grid gap-4">
+        {workers.map((worker) => (
+          <Card key={worker.id}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback>{worker.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold">{worker.name}</h3>
+                    <p className="text-sm text-muted-foreground">{worker.designation}</p>
+                    <p className="text-sm text-muted-foreground">{worker.department}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <div className="text-right">
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      <Mail className="h-4 w-4" />
+                      <span>{worker.email}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      <Phone className="h-4 w-4" />
+                      <span>{worker.phone}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Badge 
+                      variant={worker.status === 'available' ? 'default' : 'secondary'}
+                      className={worker.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
+                    >
+                      {worker.status === 'available' ? 'Available' : 'Busy'}
+                    </Badge>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDeleteWorker(worker.id)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'home': return renderDepartmentFeed();
@@ -401,6 +473,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
       case 'department-feed': return renderDepartmentFeed();
       case 'assign-tasks': return renderAssignTasks();
       case 'review-work': return renderReviewWork();
+      case 'manage-workers': return renderManageWorkers();
       default: return renderDepartmentFeed();
     }
   };
@@ -469,6 +542,19 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
               onAddComment={addComment}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Worker Dialog */}
+      <Dialog open={showAddWorkerDialog} onOpenChange={setShowAddWorkerDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Worker</DialogTitle>
+          </DialogHeader>
+          <AddWorkerForm 
+            onClose={() => setShowAddWorkerDialog(false)}
+            onAddWorker={handleAddWorker}
+          />
         </DialogContent>
       </Dialog>
     </div>
@@ -655,6 +741,102 @@ const AddCommentForm: React.FC<{ post: any; onClose: () => void; onAddComment: (
         </Button>
         <Button type="submit" disabled={!comment.trim()}>
           Add Comment
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+const AddWorkerForm: React.FC<{ onClose: () => void; onAddWorker: (worker: any) => void }> = ({ onClose, onAddWorker }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    department: '',
+    designation: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newWorker = {
+      id: Date.now(),
+      ...formData,
+      status: 'available',
+      avatar: ''
+    };
+    onAddWorker(newWorker);
+    onClose();
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="text-sm font-medium">Full Name</label>
+        <Input
+          value={formData.name}
+          onChange={(e) => handleChange('name', e.target.value)}
+          placeholder="Enter worker's full name"
+          required
+        />
+      </div>
+      
+      <div>
+        <label className="text-sm font-medium">Email</label>
+        <Input
+          type="email"
+          value={formData.email}
+          onChange={(e) => handleChange('email', e.target.value)}
+          placeholder="worker@city.gov"
+          required
+        />
+      </div>
+      
+      <div>
+        <label className="text-sm font-medium">Phone</label>
+        <Input
+          value={formData.phone}
+          onChange={(e) => handleChange('phone', e.target.value)}
+          placeholder="+1-555-0123"
+          required
+        />
+      </div>
+      
+      <div>
+        <label className="text-sm font-medium">Department</label>
+        <Select value={formData.department} onValueChange={(value) => handleChange('department', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select department" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Public Works">Public Works</SelectItem>
+            <SelectItem value="Road Maintenance">Road Maintenance</SelectItem>
+            <SelectItem value="Sanitation">Sanitation</SelectItem>
+            <SelectItem value="Parks & Recreation">Parks & Recreation</SelectItem>
+            <SelectItem value="Utilities">Utilities</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div>
+        <label className="text-sm font-medium">Designation</label>
+        <Input
+          value={formData.designation}
+          onChange={(e) => handleChange('designation', e.target.value)}
+          placeholder="e.g., Senior Technician, Field Supervisor"
+          required
+        />
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={!formData.name || !formData.email || !formData.phone || !formData.department || !formData.designation}>
+          Add Worker
         </Button>
       </div>
     </form>
