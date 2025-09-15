@@ -134,7 +134,7 @@ const convertBackendPost = (backendPost: any): Post => {
     priority: backendPost.priority || 'medium',
     notes: backendPost.notes || '',
     createdAt: backendPost.createdAt ? new Date(backendPost.createdAt).toLocaleString() : 'Unknown',
-    likes: backendPost.upvotes || 0,
+    likes: Array.isArray(backendPost.upvotes) ? backendPost.upvotes.length : (backendPost.upvotes || 0),
     comments: backendPost.comments?.length || 0,
     shares: 0
   };
@@ -200,54 +200,54 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
         } else {
           // If no stored posts, use default mock data
           const defaultPosts = [
-            {
-              id: 1,
-              user: { name: 'John Doe', avatar: '', role: 'citizen' },
-              content: 'The street lights on Main Street have been out for 3 days now. It\'s getting dangerous to walk at night. #streetlights #safety #mainstreet',
+    {
+      id: 1,
+      user: { name: 'John Doe', avatar: '', role: 'citizen' },
+      content: 'The street lights on Main Street have been out for 3 days now. It\'s getting dangerous to walk at night. #streetlights #safety #mainstreet',
               image: null, // Remove this to test mediaFiles only
               video: null,
-              mediaFiles: [
-                {
-                  file: null,
-                  url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500',
-                  type: 'image'
-                }
-              ],
-              hashtags: ['#streetlights', '#safety', '#mainstreet'],
-              location: 'Main Street, Downtown',
-              status: 'assigned',
-              assignedTo: 'Public Works Department',
-              createdAt: '2 hours ago',
-              likes: 12,
-              comments: 5,
-              shares: 3
-            },
-            {
-              id: 2,
-              user: { name: 'Sarah Wilson', avatar: '', role: 'citizen' },
-              content: 'Pothole on Oak Avenue is getting bigger every day. Almost damaged my car yesterday! #potholes #roads #oakavenue',
+      mediaFiles: [
+        {
+          file: null,
+          url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500',
+          type: 'image'
+        }
+      ],
+      hashtags: ['#streetlights', '#safety', '#mainstreet'],
+      location: 'Main Street, Downtown',
+      status: 'assigned',
+      assignedTo: 'Public Works Department',
+      createdAt: '2 hours ago',
+      likes: 12,
+      comments: 5,
+      shares: 3
+    },
+    {
+      id: 2,
+      user: { name: 'Sarah Wilson', avatar: '', role: 'citizen' },
+      content: 'Pothole on Oak Avenue is getting bigger every day. Almost damaged my car yesterday! #potholes #roads #oakavenue',
               image: null,
               video: null,
-              mediaFiles: [
-                {
-                  file: null,
-                  url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500',
-                  type: 'image'
-                }
-              ],
-              hashtags: ['#potholes', '#roads', '#oakavenue'],
-              location: 'Oak Avenue',
-              status: 'in_progress',
-              assignedTo: 'Road Maintenance Team',
-              createdAt: '4 hours ago',
-              likes: 8,
-              comments: 2,
-              shares: 1
-            },
-            {
-              id: 3,
-              user: { name: 'Mike Johnson', avatar: '', role: 'citizen' },
-              content: 'Garbage collection was missed on our street this week. Trash is piling up! #garbage #sanitation #missedcollection',
+      mediaFiles: [
+        {
+          file: null,
+          url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500',
+          type: 'image'
+        }
+      ],
+      hashtags: ['#potholes', '#roads', '#oakavenue'],
+      location: 'Oak Avenue',
+      status: 'in_progress',
+      assignedTo: 'Road Maintenance Team',
+      createdAt: '4 hours ago',
+      likes: 8,
+      comments: 2,
+      shares: 1
+    },
+    {
+      id: 3,
+      user: { name: 'Mike Johnson', avatar: '', role: 'citizen' },
+      content: 'Garbage collection was missed on our street this week. Trash is piling up! #garbage #sanitation #missedcollection',
               image: null,
               video: null,
               mediaFiles: [
@@ -257,16 +257,16 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
                   type: 'image'
                 }
               ],
-              hashtags: ['#garbage', '#sanitation', '#missedcollection'],
-              location: 'Pine Street',
-              status: 'completed',
-              assignedTo: 'Sanitation Department',
-              createdAt: '1 day ago',
-              likes: 15,
-              comments: 8,
-              shares: 4
-            }
-          ];
+      hashtags: ['#garbage', '#sanitation', '#missedcollection'],
+      location: 'Pine Street',
+      status: 'completed',
+      assignedTo: 'Sanitation Department',
+      createdAt: '1 day ago',
+      likes: 15,
+      comments: 8,
+      shares: 4
+    }
+  ];
           setPosts(defaultPosts);
           console.log('Using default mock posts');
         }
@@ -364,10 +364,10 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
   // Save posts to localStorage whenever posts change (for unauthenticated users)
   useEffect(() => {
     if (!token && posts.length > 0) {
-      try {
-        localStorage.setItem('local-gov-posts', JSON.stringify(posts));
+    try {
+      localStorage.setItem('local-gov-posts', JSON.stringify(posts));
         console.log('Auto-saved posts to localStorage:', posts.length);
-      } catch (error) {
+    } catch (error) {
         console.error('Error auto-saving posts to localStorage:', error);
       }
     }
@@ -424,11 +424,11 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
     } catch (err) {
       console.error('Error updating post:', err);
       // Fallback to local state
-      setPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.id === id ? { ...post, ...updates } : post
-        )
-      );
+    setPosts(prevPosts => 
+      prevPosts.map(post => 
+        post.id === id ? { ...post, ...updates } : post
+      )
+    );
     }
   };
 
@@ -482,18 +482,10 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
     
     if (!token) {
       // If no token, just update local state
-      const newComment = {
-        id: Date.now(),
-        text,
-        author: 'Anonymous',
-        createdAt: new Date().toISOString()
-      };
-      
       setPosts(prevPosts => 
         prevPosts.map(post => 
           post.id === id ? { 
             ...post, 
-            comments: [...(post.comments || []), newComment],
             comments: (post.comments || 0) + 1
           } : post
         )
@@ -519,7 +511,6 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
           prevPosts.map(post => 
             post.id === id ? { 
               ...post, 
-              comments: [...(post.comments || []), newComment],
               comments: (post.comments || 0) + 1
             } : post
           )
@@ -530,18 +521,10 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
     } catch (err) {
       console.error('Error adding comment:', err);
       // Fallback to local state
-      const newComment = {
-        id: Date.now(),
-        text,
-        author: 'Anonymous',
-        createdAt: new Date().toISOString()
-      };
-      
       setPosts(prevPosts => 
         prevPosts.map(post => 
           post.id === id ? { 
             ...post, 
-            comments: [...(post.comments || []), newComment],
             comments: (post.comments || 0) + 1
           } : post
         )
