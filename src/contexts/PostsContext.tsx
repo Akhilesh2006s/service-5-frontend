@@ -59,6 +59,18 @@ const API_BASE_URL = 'https://service-5-backend-production.up.railway.app/api';
 
 // Convert backend post format to frontend format
 const convertBackendPost = (backendPost: any): Post => {
+  // Handle assignedTo field - it could be an object or string
+  let assignedTo = null;
+  if (backendPost.assignedTo) {
+    if (typeof backendPost.assignedTo === 'string') {
+      assignedTo = backendPost.assignedTo;
+    } else if (backendPost.assignedTo.name) {
+      assignedTo = backendPost.assignedTo.name;
+    } else {
+      assignedTo = 'Unknown';
+    }
+  }
+
   return {
     id: backendPost._id || Date.now(),
     user: {
@@ -73,7 +85,7 @@ const convertBackendPost = (backendPost: any): Post => {
     hashtags: backendPost.hashtags || [],
     location: backendPost.location || 'Unknown Location',
     status: backendPost.status || 'pending',
-    assignedTo: backendPost.assignedTo || null,
+    assignedTo: assignedTo,
     assignedWorker: backendPost.assignedWorker || null,
     priority: backendPost.priority || 'medium',
     notes: backendPost.notes || '',
@@ -165,7 +177,51 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchPosts();
+    // Only fetch posts if we have a token (user is authenticated)
+    if (token) {
+      fetchPosts();
+    } else {
+      // If no token, show fallback posts immediately
+      setLoading(false);
+      try {
+        const stored = localStorage.getItem('local-gov-posts');
+        if (stored) {
+          const fallbackPosts = JSON.parse(stored);
+          setPosts(fallbackPosts);
+          console.log('Using fallback posts from localStorage (no auth):', fallbackPosts.length);
+        } else {
+          // Use default mock data
+          const defaultPosts = [
+            {
+              id: 1,
+              user: { name: 'John Doe', avatar: '', role: 'citizen' },
+              content: 'The street lights on Main Street have been out for 3 days now. It\'s getting dangerous to walk at night. #streetlights #safety #mainstreet',
+              image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500',
+              mediaFiles: [
+                {
+                  file: null,
+                  url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500',
+                  type: 'image'
+                }
+              ],
+              hashtags: ['#streetlights', '#safety', '#mainstreet'],
+              location: 'Main Street, Downtown',
+              status: 'assigned',
+              assignedTo: 'Public Works Department',
+              createdAt: '2 hours ago',
+              likes: 12,
+              comments: 5,
+              shares: 3
+            }
+          ];
+          setPosts(defaultPosts);
+          console.log('Using default mock posts (no auth)');
+        }
+      } catch (error) {
+        console.error('Error loading fallback posts:', error);
+        setPosts([]);
+      }
+    }
   }, [token]);
 
   const addPost = async (post: Post) => {

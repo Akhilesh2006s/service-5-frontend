@@ -255,7 +255,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                   </div>
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <p className="text-sm font-medium text-green-800 dark:text-green-200">
-                      Completed by: {post.assignedTo}
+                      Completed by: {typeof post.assignedTo === 'string' ? post.assignedTo : post.assignedTo.name || 'Unknown'}
                     </p>
                   </div>
                 </div>

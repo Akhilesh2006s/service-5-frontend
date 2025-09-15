@@ -164,7 +164,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
               
               {post.assignedTo && (
                 <div className="mb-4 p-3 bg-muted/50 rounded-lg">
-                  <p className="text-sm font-medium">Assigned to: {post.assignedTo}</p>
+                  <p className="text-sm font-medium">Assigned to: {typeof post.assignedTo === 'string' ? post.assignedTo : post.assignedTo.name || 'Unknown'}</p>
                 </div>
               )}
               
@@ -215,7 +215,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
               <p className="mb-4">{post.content}</p>
               {post.assignedTo && (
                 <div className="p-3 bg-muted/50 rounded-lg">
-                  <p className="text-sm font-medium">Assigned to: {post.assignedTo}</p>
+                  <p className="text-sm font-medium">Assigned to: {typeof post.assignedTo === 'string' ? post.assignedTo : post.assignedTo.name || 'Unknown'}</p>
                 </div>
               )}
             </CardContent>
@@ -242,7 +242,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
               </div>
               <p className="mb-4">{post.content}</p>
               <div className="p-3 bg-muted/50 rounded-lg">
-                <p className="text-sm font-medium">Assigned to: {post.assignedTo}</p>
+                <p className="text-sm font-medium">Assigned to: {typeof post.assignedTo === 'string' ? post.assignedTo : post.assignedTo.name || 'Unknown'}</p>
               </div>
             </CardContent>
           </Card>
