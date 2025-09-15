@@ -58,10 +58,33 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
     fetchTasks();
   }, []);
 
-  // Fetch tasks
+  // Fetch tasks from backend or use posts as tasks for local users
   const fetchTasks = async () => {
     try {
       const token = localStorage.getItem('token');
+      
+      // Check if user is using local authentication
+      if (token && token.startsWith('local_')) {
+        // For local users, use posts as tasks (since posts represent issues/tasks)
+        console.log('Using posts as tasks for local user:', posts);
+        const tasksFromPosts = posts.map(post => ({
+          id: post.id,
+          title: post.content.substring(0, 50) + '...',
+          description: post.content,
+          status: post.status,
+          assignedTo: post.assignedTo || 'Unassigned',
+          priority: post.priority || 'medium',
+          location: post.location,
+          createdAt: post.createdAt,
+          updatedAt: post.createdAt,
+          department: post.department || 'General'
+        }));
+        setTasks(tasksFromPosts);
+        console.log('Tasks created from posts for local user:', tasksFromPosts);
+        return;
+      }
+      
+      // Use backend API for authenticated users
       const response = await fetch('https://service-5-backend-production.up.railway.app/api/tasks', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -104,6 +127,26 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
       setWorkers(contextWorkers);
     }
   }, [contextWorkers]);
+
+  // Update tasks when posts change for local users
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token && token.startsWith('local_')) {
+      const tasksFromPosts = posts.map(post => ({
+        id: post.id,
+        title: post.content.substring(0, 50) + '...',
+        description: post.content,
+        status: post.status,
+        assignedTo: post.assignedTo || 'Unassigned',
+        priority: post.priority || 'medium',
+        location: post.location,
+        createdAt: post.createdAt,
+        updatedAt: post.createdAt,
+        department: post.department || 'General'
+      }));
+      setTasks(tasksFromPosts);
+    }
+  }, [posts]);
 
   // Fetch workers from backend or context
   const fetchWorkers = async () => {
