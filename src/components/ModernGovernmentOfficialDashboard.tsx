@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { usePosts } from '@/contexts/PostsContext';
+import { MediaTestComponent } from './MediaTestComponent';
 
 interface GovernmentOfficialDashboardProps {
   user: any;
@@ -656,6 +657,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
       case 'assign-tasks': return renderAssignTasks();
       case 'review-work': return renderReviewWork();
       case 'manage-workers': return renderManageWorkers();
+      case 'test-media': return <MediaTestComponent />;
       default: return renderDepartmentFeed();
     }
   };

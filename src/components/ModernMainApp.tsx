@@ -87,6 +87,7 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
           { id: 'assign-tasks', label: 'Assign Tasks', icon: CheckCircle },
           { id: 'review-work', label: 'Review Work', icon: FileText },
           { id: 'manage-workers', label: 'Manage Workers', icon: Users },
+          { id: 'test-media', label: 'Test Media', icon: BarChart3 },
         ];
       case 'worker':
         return [
