@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { FileUpload } from './FileUpload';
 import { usePosts } from '@/contexts/PostsContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CreatePostFormProps {
   user: any;
@@ -46,30 +47,117 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, o
         console.log('Media files uploaded successfully:', uploadedMediaFiles);
       }
 
-      // Create the new post with uploaded media files
-      const newPost = {
-        id: Date.now(),
-        user: { 
-          name: user.name, 
-          avatar: user.avatar || '', 
-          role: user.role || 'citizen' 
-        },
-        content: content,
-        image: null,
-        video: null,
-        mediaFiles: uploadedMediaFiles,
-        hashtags: allHashtags,
-        location: location,
-        status: 'pending',
-        assignedTo: null,
-        createdAt: 'Just now',
-        likes: 0,
-        comments: 0,
-        shares: 0
-      };
+      // Send to backend first
+      const { token } = useAuth();
+      const API_BASE_URL = 'https://service-5-backend-production.up.railway.app/api';
+      
+      if (token) {
+        try {
+          // Prepare data for backend
+          const postData = {
+            title: content.substring(0, 100), // Use first 100 chars as title
+            description: content,
+            category: 'other', // Default category
+            priority: 'medium',
+            location: location,
+            department: 'general',
+            images: uploadedMediaFiles.filter(f => f.type === 'image').map(f => f.url),
+            videos: uploadedMediaFiles.filter(f => f.type === 'video').map(f => f.url),
+          };
 
-      console.log('Created post with media files:', newPost);
-      onPostCreated(newPost);
+          console.log('Sending post to backend:', postData);
+
+          const response = await fetch(`${API_BASE_URL}/posts`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(postData),
+          });
+
+          if (response.ok) {
+            const backendPost = await response.json();
+            console.log('Backend response:', backendPost);
+            
+            // Convert backend post to frontend format
+            const newPost = {
+              id: backendPost._id,
+              user: { 
+                name: backendPost.author?.name || user.name, 
+                avatar: user.avatar || '', 
+                role: backendPost.author?.role || user.role || 'citizen' 
+              },
+              content: backendPost.description,
+              image: null,
+              video: null,
+              mediaFiles: uploadedMediaFiles,
+              hashtags: allHashtags,
+              location: backendPost.location,
+              status: backendPost.status,
+              assignedTo: null,
+              createdAt: 'Just now',
+              likes: backendPost.upvotes?.length || 0,
+              comments: backendPost.comments?.length || 0,
+              shares: 0
+            };
+
+            console.log('Converted post for frontend:', newPost);
+            onPostCreated(newPost);
+          } else {
+            const error = await response.json();
+            console.error('Backend error:', error);
+            throw new Error(error.message || 'Failed to create post');
+          }
+        } catch (error) {
+          console.error('Error sending to backend:', error);
+          // Fallback to local creation if backend fails
+          const newPost = {
+            id: Date.now(),
+            user: { 
+              name: user.name, 
+              avatar: user.avatar || '', 
+              role: user.role || 'citizen' 
+            },
+            content: content,
+            image: null,
+            video: null,
+            mediaFiles: uploadedMediaFiles,
+            hashtags: allHashtags,
+            location: location,
+            status: 'pending',
+            assignedTo: null,
+            createdAt: 'Just now',
+            likes: 0,
+            comments: 0,
+            shares: 0
+          };
+          onPostCreated(newPost);
+        }
+      } else {
+        // Fallback for unauthenticated users
+        const newPost = {
+          id: Date.now(),
+          user: { 
+            name: user.name, 
+            avatar: user.avatar || '', 
+            role: user.role || 'citizen' 
+          },
+          content: content,
+          image: null,
+          video: null,
+          mediaFiles: uploadedMediaFiles,
+          hashtags: allHashtags,
+          location: location,
+          status: 'pending',
+          assignedTo: null,
+          createdAt: 'Just now',
+          likes: 0,
+          comments: 0,
+          shares: 0
+        };
+        onPostCreated(newPost);
+      }
       
       // Reset form
       setContent('');
@@ -142,3 +230,4 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, o
     </form>
   );
 };
+
