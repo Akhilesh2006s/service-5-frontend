@@ -478,7 +478,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
 
       {/* Create Post Dialog - Available on all pages */}
       <Dialog open={showCreatePost} onOpenChange={setShowCreatePost}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Report a Problem</DialogTitle>
           </DialogHeader>

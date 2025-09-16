@@ -14,6 +14,7 @@ interface CreatePostFormProps {
 }
 
 export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, onPostCreated }) => {
+  console.log('CreatePostForm rendered with user:', user);
   const [content, setContent] = useState('');
   const [hashtags, setHashtags] = useState('');
   const [location, setLocation] = useState('');
