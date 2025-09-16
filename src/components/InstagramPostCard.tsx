@@ -71,16 +71,16 @@ export const InstagramPostCard: React.FC<InstagramPostCardProps> = ({
   };
 
   return (
-    <div className="bg-white border-2 border-red-500 rounded-lg mb-6 max-w-2xl mx-auto">
+    <div className="bg-gray-900 border border-gray-700 rounded-lg mb-6 max-w-2xl mx-auto">
       {/* DEBUG: Instagram Post Card is working! */}
-      <div className="bg-yellow-200 p-2 text-center text-sm font-bold">
+      <div className="bg-yellow-500 text-black p-2 text-center text-sm font-bold">
         🎉 INSTAGRAM STYLE POST CARD IS WORKING! 🎉
       </div>
       {/* Post Header */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-pink-500 p-0.5">
-            <div className="w-full h-full rounded-full bg-white p-0.5">
+            <div className="w-full h-full rounded-full bg-gray-900 p-0.5">
               <img
                 src={post.user.avatar || `https://ui-avatars.com/api/?name=${post.user.name}&background=random`}
                 alt={post.user.name}
@@ -89,13 +89,13 @@ export const InstagramPostCard: React.FC<InstagramPostCardProps> = ({
             </div>
           </div>
           <div>
-            <div className="font-semibold text-sm">{post.user.name}</div>
+            <div className="font-semibold text-sm text-white">{post.user.name}</div>
             {post.location && (
-              <div className="text-xs text-gray-500">{post.location}</div>
+              <div className="text-xs text-gray-400">{post.location}</div>
             )}
           </div>
         </div>
-        <button className="p-1 hover:bg-gray-100 rounded-full">
+        <button className="p-1 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white">
           <MoreHorizontal className="w-5 h-5" />
         </button>
       </div>
@@ -186,20 +186,20 @@ export const InstagramPostCard: React.FC<InstagramPostCardProps> = ({
             <button
               onClick={() => onLike(post.id)}
               className={`transition-colors ${
-                post.isLiked ? 'text-red-500' : 'text-gray-700 hover:text-red-500'
+                post.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
               }`}
             >
               <Heart className={`w-6 h-6 ${post.isLiked ? 'fill-current' : ''}`} />
             </button>
             <button
               onClick={() => setIsCommenting(!isCommenting)}
-              className="text-gray-700 hover:text-gray-500 transition-colors"
+              className="text-gray-400 hover:text-white transition-colors"
             >
               <MessageCircle className="w-6 h-6" />
             </button>
             <button
               onClick={() => onShare(post.id)}
-              className="text-gray-700 hover:text-gray-500 transition-colors"
+              className="text-gray-400 hover:text-white transition-colors"
             >
               <Send className="w-6 h-6" />
             </button>
@@ -214,13 +214,13 @@ export const InstagramPostCard: React.FC<InstagramPostCardProps> = ({
 
         {/* Likes Count */}
         {post.likes > 0 && (
-          <div className="font-semibold text-sm mb-2">
+          <div className="font-semibold text-sm mb-2 text-white">
             {post.likes} {post.likes === 1 ? 'like' : 'likes'}
           </div>
         )}
 
         {/* Post Content */}
-        <div className="text-sm mb-2">
+        <div className="text-sm mb-2 text-white">
           <span className="font-semibold mr-2">{post.user.name}</span>
           <span>{post.content}</span>
         </div>
@@ -229,12 +229,12 @@ export const InstagramPostCard: React.FC<InstagramPostCardProps> = ({
         {post.comments.length > 0 && (
           <div className="mb-2">
             {post.comments.length > 2 && (
-              <button className="text-gray-500 text-sm mb-1">
+              <button className="text-gray-400 text-sm mb-1">
                 View all {post.comments.length} comments
               </button>
             )}
             {post.comments.slice(-2).map((comment) => (
-              <div key={comment.id} className="text-sm mb-1">
+              <div key={comment.id} className="text-sm mb-1 text-white">
                 <span className="font-semibold mr-2">{comment.author}</span>
                 <span>{comment.text}</span>
               </div>
@@ -243,7 +243,7 @@ export const InstagramPostCard: React.FC<InstagramPostCardProps> = ({
         )}
 
         {/* Time */}
-        <div className="text-gray-500 text-xs mb-3">
+        <div className="text-gray-400 text-xs mb-3">
           {formatTimeAgo(post.createdAt)}
         </div>
 
@@ -254,7 +254,7 @@ export const InstagramPostCard: React.FC<InstagramPostCardProps> = ({
             placeholder="Add a comment..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            className="flex-1 text-sm border-none outline-none placeholder-gray-500"
+            className="flex-1 text-sm border-none outline-none placeholder-gray-400 bg-transparent text-white"
           />
           {newComment.trim() && (
             <button
