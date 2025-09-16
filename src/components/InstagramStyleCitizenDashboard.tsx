@@ -105,14 +105,20 @@ export const InstagramStyleCitizenDashboard: React.FC<CitizenDashboardProps> = (
     if (!mediaFiles || mediaFiles.length === 0) return null;
 
     return (
-      <div className="space-y-2">
+      <div className={`grid gap-2 ${
+        mediaFiles.length === 1 ? 'grid-cols-1' :
+        mediaFiles.length === 2 ? 'grid-cols-2' :
+        mediaFiles.length === 3 ? 'grid-cols-2' :
+        mediaFiles.length === 4 ? 'grid-cols-2' :
+        'grid-cols-3'
+      }`}>
         {mediaFiles.map((media, index) => (
           <div key={index} className="relative group">
             {media.type === 'image' ? (
               <img
                 src={media.url}
                 alt={`Post ${postId} media ${index}`}
-                className="w-full h-auto max-h-96 object-cover rounded-lg cursor-pointer transition-transform hover:scale-105"
+                className="w-full h-48 object-cover rounded-lg cursor-pointer transition-transform hover:scale-105"
                 onClick={() => setExpandedImage(media.url)}
                 onError={(e) => {
                   console.log('Image failed to load:', media.url);
@@ -129,29 +135,39 @@ export const InstagramStyleCitizenDashboard: React.FC<CitizenDashboardProps> = (
                 }}
               />
             ) : (
-              <video
-                src={media.url}
-                controls
-                className="w-full h-auto max-h-96 object-cover rounded-lg"
-                onError={(e) => {
-                  console.log('Video failed to load:', media.url);
-                  console.log('Video media object:', media);
-                  console.log('Has base64Data:', !!media.base64Data);
-                  console.log('Has fallbackImage:', !!media.fallbackImage);
-                  if (media.base64Data) {
-                    e.currentTarget.src = media.base64Data;
-                  } else if (media.fallbackImage) {
-                    // For videos, show fallback image instead
-                    const videoElement = e.currentTarget;
-                    const parentDiv = videoElement.parentElement;
-                    if (parentDiv) {
-                      parentDiv.innerHTML = `<img src="${media.fallbackImage}" alt="Video not available" class="w-full h-auto max-h-96 object-cover rounded-lg" />`;
+              <div className="relative">
+                <video
+                  src={media.url}
+                  controls
+                  className="w-full h-48 object-cover rounded-lg"
+                  onError={(e) => {
+                    console.log('Video failed to load:', media.url);
+                    console.log('Video media object:', media);
+                    console.log('Has base64Data:', !!media.base64Data);
+                    console.log('Has fallbackImage:', !!media.fallbackImage);
+                    if (media.base64Data) {
+                      e.currentTarget.src = media.base64Data;
+                    } else if (media.fallbackImage) {
+                      // For videos, show fallback image instead
+                      const videoElement = e.currentTarget;
+                      const parentDiv = videoElement.parentElement;
+                      if (parentDiv) {
+                        parentDiv.innerHTML = `<img src="${media.fallbackImage}" alt="Video not available" class="w-full h-48 object-cover rounded-lg" />`;
+                      }
+                    } else {
+                      e.currentTarget.style.display = 'none';
                     }
-                  } else {
-                    e.currentTarget.style.display = 'none';
-                  }
-                }}
-              />
+                  }}
+                />
+                {/* Show play icon for videos */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="bg-black bg-opacity-50 rounded-full p-2">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         ))}

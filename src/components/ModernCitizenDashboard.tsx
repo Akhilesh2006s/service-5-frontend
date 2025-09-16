@@ -167,41 +167,59 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
               
               {/* Display all media files */}
               {post.mediaFiles && post.mediaFiles.length > 0 && (
-                <div className="mb-4 space-y-2">
+                <div className="mb-4">
                   {console.log('Rendering mediaFiles:', post.mediaFiles)}
-                  {post.mediaFiles.map((media, index) => {
-                    console.log('Rendering media:', media);
-                    return (
-                    <div key={index} className="rounded-lg overflow-hidden">
-                      {media.type === 'image' ? (
-                        <img 
-                          src={media.url} 
-                          alt="Post" 
-                          className="w-full h-64 object-cover"
-                          onLoad={() => console.log('Image loaded successfully:', media.url)}
-                          onError={(e) => {
-                            console.error('Image failed to load:', media.url);
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <video 
-                          src={media.url} 
-                          controls 
-                          className="w-full h-64 object-cover"
-                          preload="metadata"
-                          onLoadStart={() => console.log('Video loading started:', media.url)}
-                          onError={(e) => {
-                            console.error('Video failed to load:', media.url);
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        >
-                          Your browser does not support the video tag.
-                        </video>
-                      )}
-                    </div>
-                    );
-                  })}
+                  <div className={`grid gap-2 ${
+                    post.mediaFiles.length === 1 ? 'grid-cols-1' :
+                    post.mediaFiles.length === 2 ? 'grid-cols-2' :
+                    post.mediaFiles.length === 3 ? 'grid-cols-2' :
+                    post.mediaFiles.length === 4 ? 'grid-cols-2' :
+                    'grid-cols-3'
+                  }`}>
+                    {post.mediaFiles.map((media, index) => {
+                      console.log('Rendering media:', media);
+                      return (
+                      <div key={index} className="rounded-lg overflow-hidden relative group">
+                        {media.type === 'image' ? (
+                          <img 
+                            src={media.url} 
+                            alt="Post" 
+                            className="w-full h-48 object-cover cursor-pointer transition-transform hover:scale-105"
+                            onLoad={() => console.log('Image loaded successfully:', media.url)}
+                            onError={(e) => {
+                              console.error('Image failed to load:', media.url);
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <video 
+                            src={media.url} 
+                            controls 
+                            className="w-full h-48 object-cover"
+                            preload="metadata"
+                            onLoadStart={() => console.log('Video loading started:', media.url)}
+                            onError={(e) => {
+                              console.error('Video failed to load:', media.url);
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        )}
+                        {/* Show play icon for videos */}
+                        {media.type === 'video' && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="bg-black bg-opacity-50 rounded-full p-2">
+                              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
               
