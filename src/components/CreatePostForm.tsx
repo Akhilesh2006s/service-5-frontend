@@ -77,8 +77,8 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, o
             priority: 'medium',
             location: location,
             department: 'general',
-            images: uploadedMediaFiles.filter(f => f.type === 'image').map(f => f.url),
-            videos: uploadedMediaFiles.filter(f => f.type === 'video').map(f => f.url),
+            images: uploadedMediaFiles.filter(f => f.type === 'image').map(f => ({ url: f.url, base64Data: '' })),
+            videos: uploadedMediaFiles.filter(f => f.type === 'video').map(f => ({ url: f.url, base64Data: '' })),
           };
 
           console.log('Sending post to backend:', postData);
