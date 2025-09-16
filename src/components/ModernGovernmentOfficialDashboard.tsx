@@ -422,11 +422,11 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
     </div>
   );
 
-  const renderAssignTasks = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Assign Tasks</h2>
-      
-      <div className="grid gap-4">
+  // const renderAssignTasks = () => (
+  //   <div className="space-y-6">
+  //     <h2 className="text-2xl font-bold">Assign Tasks</h2>
+  //     
+  //     <div className="grid gap-4">
         {posts.filter(post => post.status === 'pending' || post.status === 'assigned').map((post) => (
           <Card key={post.id}>
             <CardContent className="p-6">
