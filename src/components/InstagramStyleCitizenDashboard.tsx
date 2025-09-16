@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { FileUpload } from './FileUpload';
 import { CreatePostForm } from './CreatePostForm';
+import { InstagramPostCard } from './InstagramPostCard';
 import { usePosts } from '@/contexts/PostsContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -33,6 +34,30 @@ export const InstagramStyleCitizenDashboard: React.FC<CitizenDashboardProps> = (
   const [showPostModal, setShowPostModal] = useState(false);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const { posts, addPost, deletePost, likePost, addComment, savePostsToLocalStorage } = usePosts();
+
+  const handleLikePost = async (postId: string) => {
+    try {
+      await likePost(postId);
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
+  };
+
+  const handleAddComment = async (postId: string, comment: string) => {
+    try {
+      await addComment(postId, comment);
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
+  };
+
+  const handleSharePost = (postId: string) => {
+    console.log('Sharing post:', postId);
+  };
+
+  const handleBookmarkPost = (postId: string) => {
+    console.log('Bookmarking post:', postId);
+  };
 
   const trendingHashtags = [
     { tag: '#streetlights', count: 24 },
@@ -518,7 +543,30 @@ export const InstagramStyleCitizenDashboard: React.FC<CitizenDashboardProps> = (
               </CardContent>
             </Card>
           ) : (
-            filteredPosts.map(renderPost)
+            filteredPosts.map((post) => (
+              <InstagramPostCard
+                key={post.id}
+                post={{
+                  id: post.id,
+                  user: {
+                    name: post.user.name,
+                    avatar: post.user.avatar || `https://ui-avatars.com/api/?name=${post.user.name}&background=random`,
+                    role: post.user.role || 'citizen'
+                  },
+                  content: post.content,
+                  mediaFiles: post.mediaFiles || (post.image ? [{ url: post.image, type: 'image' as const }] : []),
+                  location: post.location,
+                  createdAt: post.createdAt,
+                  likes: post.likes || 0,
+                  comments: post.comments || [],
+                  isLiked: false
+                }}
+                onLike={handleLikePost}
+                onComment={handleAddComment}
+                onShare={handleSharePost}
+                onBookmark={handleBookmarkPost}
+              />
+            ))
           )}
         </div>
       </div>
