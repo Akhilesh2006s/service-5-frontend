@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { PostCard } from './PostCard';
+import { InstagramPostCard } from './InstagramPostCard';
 import { Header } from './Header';
 
 interface HomePageProps {
@@ -8,6 +8,26 @@ interface HomePageProps {
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ user }) => {
+  const handleLikePost = async (postId: string) => {
+    console.log('Liking post:', postId);
+  };
+
+  const handleAddComment = async (postId: string, comment: string) => {
+    console.log('Adding comment to post:', postId, comment);
+  };
+
+  const handleSharePost = (postId: string) => {
+    console.log('Sharing post:', postId);
+  };
+
+  const handleBookmarkPost = (postId: string) => {
+    console.log('Bookmarking post:', postId);
+  };
+
+  const handleDeletePost = (postId: string) => {
+    console.log('Deleting post:', postId);
+  };
+
   const [posts] = useState([
     {
       id: 1,
@@ -241,9 +261,32 @@ export const HomePage: React.FC<HomePageProps> = ({ user }) => {
         </div>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-4">
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
+          <InstagramPostCard
+            key={post.id}
+            post={{
+              id: post.id.toString(),
+              user: {
+                name: post.user.name,
+                avatar: `https://ui-avatars.com/api/?name=${post.user.name}&background=random`,
+                role: 'citizen'
+              },
+              content: post.content,
+              mediaFiles: post.hasVideo ? [{ url: '/placeholder.svg', type: 'video' as const }] : [],
+              location: post.user.location,
+              createdAt: post.timestamp,
+              likes: post.reactions.likes,
+              comments: [],
+              isLiked: false
+            }}
+            currentUser={user}
+            onLike={handleLikePost}
+            onComment={handleAddComment}
+            onShare={handleSharePost}
+            onBookmark={handleBookmarkPost}
+            onDelete={handleDeletePost}
+          />
         ))}
       </div>
 
