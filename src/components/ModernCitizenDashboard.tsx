@@ -28,6 +28,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedHashtag, setSelectedHashtag] = useState('all');
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [postSlides, setPostSlides] = useState<Record<string, number>>({});
   const { posts, addPost, deletePost, likePost, addComment, savePostsToLocalStorage } = usePosts();
 
   // Debug user object
@@ -169,45 +170,36 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
               {post.mediaFiles && post.mediaFiles.length > 0 && (
                 <div className="mb-4">
                   {console.log('Rendering mediaFiles:', post.mediaFiles)}
-                  <div className={`grid gap-2 ${
-                    post.mediaFiles.length === 1 ? 'grid-cols-1' :
-                    post.mediaFiles.length === 2 ? 'grid-cols-2' :
-                    post.mediaFiles.length === 3 ? 'grid-cols-2' :
-                    post.mediaFiles.length === 4 ? 'grid-cols-2' :
-                    'grid-cols-3'
-                  }`}>
-                    {post.mediaFiles.map((media, index) => {
-                      console.log('Rendering media:', media);
-                      return (
-                      <div key={index} className="rounded-lg overflow-hidden relative group">
-                        {media.type === 'image' ? (
-                          <img 
-                            src={media.url} 
-                            alt="Post" 
-                            className="w-full h-48 object-cover cursor-pointer transition-transform hover:scale-105"
-                            onLoad={() => console.log('Image loaded successfully:', media.url)}
-                            onError={(e) => {
-                              console.error('Image failed to load:', media.url);
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        ) : (
+                  {post.mediaFiles.length === 1 ? (
+                    // Single image - full width
+                    <div className="rounded-lg overflow-hidden relative group">
+                      {post.mediaFiles[0].type === 'image' ? (
+                        <img 
+                          src={post.mediaFiles[0].url} 
+                          alt="Post" 
+                          className="w-full h-64 object-cover cursor-pointer transition-transform hover:scale-105"
+                          onLoad={() => console.log('Image loaded successfully:', post.mediaFiles[0].url)}
+                          onError={(e) => {
+                            console.error('Image failed to load:', post.mediaFiles[0].url);
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="relative">
                           <video 
-                            src={media.url} 
+                            src={post.mediaFiles[0].url} 
                             controls 
-                            className="w-full h-48 object-cover"
+                            className="w-full h-64 object-cover"
                             preload="metadata"
-                            onLoadStart={() => console.log('Video loading started:', media.url)}
+                            onLoadStart={() => console.log('Video loading started:', post.mediaFiles[0].url)}
                             onError={(e) => {
-                              console.error('Video failed to load:', media.url);
+                              console.error('Video failed to load:', post.mediaFiles[0].url);
                               e.currentTarget.style.display = 'none';
                             }}
                           >
                             Your browser does not support the video tag.
                           </video>
-                        )}
-                        {/* Show play icon for videos */}
-                        {media.type === 'video' && (
+                          {/* Show play icon for videos */}
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <div className="bg-black bg-opacity-50 rounded-full p-2">
                               <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -215,11 +207,115 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
                               </svg>
                             </div>
                           </div>
-                        )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    // Multiple images - carousel with slide bar
+                    <div className="relative">
+                      <div className="overflow-hidden rounded-lg">
+                        <div 
+                          className="flex transition-transform duration-300 ease-in-out"
+                          style={{ transform: `translateX(-${(postSlides[post.id] || 0) * 100}%)` }}
+                        >
+                          {post.mediaFiles.map((media, index) => (
+                            <div key={index} className="w-full flex-shrink-0 relative group">
+                              {media.type === 'image' ? (
+                                <img 
+                                  src={media.url} 
+                                  alt="Post" 
+                                  className="w-full h-64 object-cover cursor-pointer transition-transform hover:scale-105"
+                                  onLoad={() => console.log('Image loaded successfully:', media.url)}
+                                  onError={(e) => {
+                                    console.error('Image failed to load:', media.url);
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <div className="relative">
+                                  <video 
+                                    src={media.url} 
+                                    controls 
+                                    className="w-full h-64 object-cover"
+                                    preload="metadata"
+                                    onLoadStart={() => console.log('Video loading started:', media.url)}
+                                    onError={(e) => {
+                                      console.error('Video failed to load:', media.url);
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  >
+                                    Your browser does not support the video tag.
+                                  </video>
+                                  {/* Show play icon for videos */}
+                                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div className="bg-black bg-opacity-50 rounded-full p-2">
+                                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                                      </svg>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      );
-                    })}
-                  </div>
+                      
+                      {/* Navigation arrows */}
+                      {post.mediaFiles.length > 1 && (
+                        <>
+                          <button
+                            onClick={() => {
+                              const newSlide = Math.max(0, (postSlides[post.id] || 0) - 1);
+                              setPostSlides(prev => ({ ...prev, [post.id]: newSlide }));
+                            }}
+                            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-2 transition-all"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => {
+                              const newSlide = Math.min(post.mediaFiles.length - 1, (postSlides[post.id] || 0) + 1);
+                              setPostSlides(prev => ({ ...prev, [post.id]: newSlide }));
+                            }}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-2 transition-all"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                      
+                      {/* Slide indicator dots */}
+                      {post.mediaFiles.length > 1 && (
+                        <div className="flex justify-center mt-2 space-x-2">
+                          {post.mediaFiles.map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                setPostSlides(prev => ({ ...prev, [post.id]: index }));
+                              }}
+                              className={`w-2 h-2 rounded-full transition-all ${
+                                index === (postSlides[post.id] || 0) 
+                                  ? 'bg-blue-500' 
+                                  : 'bg-gray-300 hover:bg-gray-400'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Image counter */}
+                      {post.mediaFiles.length > 1 && (
+                        <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                          {(postSlides[post.id] || 0) + 1}/{post.mediaFiles.length}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
               
