@@ -29,6 +29,11 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, o
       return;
     }
 
+    if (location.trim().length < 3) {
+      alert('Location must be at least 3 characters long');
+      return;
+    }
+
     setLoading(true);
     
     try {
@@ -107,32 +112,14 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, o
           } else {
             const error = await response.json();
             console.error('Backend error:', error);
-            throw new Error(error.message || 'Failed to create post');
+            console.error('Response status:', response.status);
+            throw new Error(error.message || `Failed to create post (${response.status})`);
           }
         } catch (error) {
           console.error('Error sending to backend:', error);
-          // Fallback to local creation if backend fails
-          const newPost = {
-            id: Date.now(),
-            user: { 
-              name: user.name, 
-              avatar: user.avatar || '', 
-              role: user.role || 'citizen' 
-            },
-            content: content,
-            image: null,
-            video: null,
-            mediaFiles: uploadedMediaFiles,
-            hashtags: allHashtags,
-            location: location,
-            status: 'pending',
-            assignedTo: null,
-            createdAt: 'Just now',
-            likes: 0,
-            comments: 0,
-            shares: 0
-          };
-          onPostCreated(newPost);
+          alert(`Error creating post: ${error.message || 'Unknown error'}`);
+          setLoading(false);
+          return;
         }
       } else {
         // Fallback for unauthenticated users
