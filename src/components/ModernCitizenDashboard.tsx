@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { FileUpload } from './FileUpload';
 import { CreatePostForm } from './CreatePostForm';
+import { InstagramPostCard } from './InstagramPostCard';
 import { usePosts } from '@/contexts/PostsContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -41,6 +42,34 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
     { tag: '#safety', count: 10 },
     { tag: '#roads', count: 8 }
   ];
+
+  const handleLikePost = async (postId: string) => {
+    try {
+      await likePost(postId);
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
+  };
+
+  const handleAddComment = async (postId: string, comment: string) => {
+    try {
+      await addComment(postId, comment);
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
+  };
+
+  const handleSharePost = (postId: string) => {
+    // Implement share functionality
+    console.log('Sharing post:', postId);
+    // You can add share to clipboard or social media here
+  };
+
+  const handleBookmarkPost = (postId: string) => {
+    // Implement bookmark functionality
+    console.log('Bookmarking post:', postId);
+    // You can add bookmark to localStorage or backend here
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -103,291 +132,35 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ user, curren
       <div className="space-y-4">
         {posts.map((post) => {
           console.log('Rendering post:', post);
-          console.log('Post mediaFiles:', post.mediaFiles);
-          console.log('Post image:', post.image);
           return (
-          <Card key={post.id} className="overflow-hidden">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={post.user.avatar} alt={post.user.name} />
-                    <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{post.user.name}</p>
-                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      <span>{post.createdAt}</span>
-                      <span>•</span>
-                      <div className="flex items-center space-x-1">
-                        <MapPin className="h-3 w-3" />
-                        <span>{post.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                <Badge className={cn("text-xs", getStatusColor(post.status))}>
-                  {getStatusIcon(post.status)}
-                  <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
-                </Badge>
-                  {(() => {
-                    console.log('Checking delete visibility:', {
-                      postAuthor: post.user.name,
-                      currentUser: user.name,
-                      shouldShow: post.user.name === user.name
-                    });
-                    return post.user.name === user.name;
-                  })() && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this post?')) {
-                              deletePost(post.id);
-                            }
-                          }}
-                          className="text-red-600 focus:text-red-600"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete Post
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <p className="mb-4">{post.content}</p>
-              
-              {/* Display all media files */}
-              {post.mediaFiles && post.mediaFiles.length > 0 && (
-                <div className="mb-4">
-                  {console.log('Rendering mediaFiles:', post.mediaFiles)}
-                  {post.mediaFiles.length === 1 ? (
-                    // Single image - full width
-                    <div className="rounded-lg overflow-hidden relative group">
-                      {post.mediaFiles[0].type === 'image' ? (
-                        <img 
-                          src={post.mediaFiles[0].url} 
-                          alt="Post" 
-                          className="w-full h-64 object-cover cursor-pointer transition-transform hover:scale-105"
-                          onLoad={() => console.log('Image loaded successfully:', post.mediaFiles[0].url)}
-                          onError={(e) => {
-                            console.error('Image failed to load:', post.mediaFiles[0].url);
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <div className="relative">
-                          <video 
-                            src={post.mediaFiles[0].url} 
-                            controls 
-                            className="w-full h-64 object-cover"
-                            preload="metadata"
-                            onLoadStart={() => console.log('Video loading started:', post.mediaFiles[0].url)}
-                            onError={(e) => {
-                              console.error('Video failed to load:', post.mediaFiles[0].url);
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          >
-                            Your browser does not support the video tag.
-                          </video>
-                          {/* Show play icon for videos */}
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="bg-black bg-opacity-50 rounded-full p-2">
-                              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    // Multiple images - carousel with slide bar
-                    <div className="relative">
-                      <div className="overflow-hidden rounded-lg">
-                        <div 
-                          className="flex transition-transform duration-300 ease-in-out"
-                          style={{ transform: `translateX(-${(postSlides[post.id] || 0) * 100}%)` }}
-                        >
-                          {post.mediaFiles.map((media, index) => (
-                            <div key={index} className="w-full flex-shrink-0 relative group">
-                              {media.type === 'image' ? (
-                                <img 
-                                  src={media.url} 
-                                  alt="Post" 
-                                  className="w-full h-64 object-cover cursor-pointer transition-transform hover:scale-105"
-                                  onLoad={() => console.log('Image loaded successfully:', media.url)}
-                                  onError={(e) => {
-                                    console.error('Image failed to load:', media.url);
-                                    e.currentTarget.style.display = 'none';
-                                  }}
-                                />
-                              ) : (
-                                <div className="relative">
-                                  <video 
-                                    src={media.url} 
-                                    controls 
-                                    className="w-full h-64 object-cover"
-                                    preload="metadata"
-                                    onLoadStart={() => console.log('Video loading started:', media.url)}
-                                    onError={(e) => {
-                                      console.error('Video failed to load:', media.url);
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  >
-                                    Your browser does not support the video tag.
-                                  </video>
-                                  {/* Show play icon for videos */}
-                                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div className="bg-black bg-opacity-50 rounded-full p-2">
-                                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
-                                      </svg>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      {/* Navigation arrows */}
-                      {post.mediaFiles.length > 1 && (
-                        <>
-                          <button
-                            onClick={() => {
-                              const newSlide = Math.max(0, (postSlides[post.id] || 0) - 1);
-                              setPostSlides(prev => ({ ...prev, [post.id]: newSlide }));
-                            }}
-                            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-2 transition-all"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => {
-                              const newSlide = Math.min(post.mediaFiles.length - 1, (postSlides[post.id] || 0) + 1);
-                              setPostSlides(prev => ({ ...prev, [post.id]: newSlide }));
-                            }}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-2 transition-all"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </button>
-                        </>
-                      )}
-                      
-                      {/* Slide indicator dots */}
-                      {post.mediaFiles.length > 1 && (
-                        <div className="flex justify-center mt-2 space-x-2">
-                          {post.mediaFiles.map((_, index) => (
-                            <button
-                              key={index}
-                              onClick={() => {
-                                setPostSlides(prev => ({ ...prev, [post.id]: index }));
-                              }}
-                              className={`w-2 h-2 rounded-full transition-all ${
-                                index === (postSlides[post.id] || 0) 
-                                  ? 'bg-blue-500' 
-                                  : 'bg-gray-300 hover:bg-gray-400'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      )}
-                      
-                      {/* Image counter */}
-                      {post.mediaFiles.length > 1 && (
-                        <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                          {(postSlides[post.id] || 0) + 1}/{post.mediaFiles.length}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {/* Fallback for old posts with single image */}
-              {!post.mediaFiles && post.image && (
-                <div className="mb-4 rounded-lg overflow-hidden">
-                  {console.log('Rendering fallback image:', post.image)}
-                  <img 
-                    src={post.image} 
-                    alt="Post" 
-                    className="w-full h-64 object-cover"
-                    onError={(e) => {
-                      console.error('Fallback image failed to load:', post.image);
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
-              
-              <div className="flex flex-wrap gap-2 mb-4">
-                {post.hashtags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    <Hash className="h-3 w-3 mr-1" />
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-              
-              {post.assignedTo && (
-                <div className="mb-4 p-3 bg-muted/50 rounded-lg">
-                  <p className="text-sm font-medium">Assigned to: {typeof post.assignedTo === 'string' ? post.assignedTo : post.assignedTo.name || 'Unknown'}</p>
-                </div>
-              )}
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-muted-foreground hover:text-red-500"
-                    onClick={() => likePost(post.id)}
-                  >
-                    <Heart className="h-4 w-4 mr-2" />
-                    {post.likes}
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-muted-foreground hover:text-blue-500"
-                    onClick={() => {
-                      const comment = prompt('Add a comment:');
-                      if (comment && comment.trim()) {
-                        addComment(post.id, comment.trim());
-                      }
-                    }}
-                  >
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    {post.comments}
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground">
-                    <Share2 className="h-4 w-4 mr-2" />
-                    {post.shares}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <InstagramPostCard
+              key={post.id}
+              post={{
+                id: post.id,
+                user: {
+                  name: post.user.name,
+                  avatar: post.user.avatar || `https://ui-avatars.com/api/?name=${post.user.name}&background=random`,
+                  role: post.user.role || 'citizen'
+                },
+                content: post.content,
+                mediaFiles: post.mediaFiles || (post.image ? [{ url: post.image, type: 'image' as const }] : []),
+                location: post.location,
+                createdAt: post.createdAt,
+                likes: post.likes || 0,
+                comments: post.comments || [],
+                isLiked: false
+              }}
+              onLike={handleLikePost}
+              onComment={handleAddComment}
+              onShare={handleSharePost}
+              onBookmark={handleBookmarkPost}
+            />
           );
         })}
       </div>
     </div>
   );
+
 
   const renderMyPosts = () => {
     const myPosts = posts.filter(post => post.user.name === user.name);
