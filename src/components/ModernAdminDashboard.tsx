@@ -443,7 +443,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, currentVie
 const AddUserForm: React.FC<{ onClose: () => void; onCreateUser: (userData: any) => Promise<boolean> }> = ({ onClose, onCreateUser }) => {
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
+    username: '',
     role: '',
     department: '',
     designation: '',
@@ -457,14 +457,16 @@ const AddUserForm: React.FC<{ onClose: () => void; onCreateUser: (userData: any)
     setLoading(true);
     
     try {
+      console.log('Form data being submitted:', formData);
       const success = await onCreateUser(formData);
+      console.log('Create user result:', success);
       if (success) {
         alert(`${formData.role === 'government' ? 'Government Official' : 'Worker'} created successfully!`);
         onClose();
         // Reset form
         setFormData({
           name: '',
-          email: '',
+          username: '',
           role: '',
           department: '',
           designation: '',
@@ -498,12 +500,12 @@ const AddUserForm: React.FC<{ onClose: () => void; onCreateUser: (userData: any)
       </div>
       
       <div>
-        <label className="text-sm font-medium">Email</label>
+        <label className="text-sm font-medium">Username</label>
         <Input
-          type="email"
-          placeholder="Enter email address"
-          value={formData.email}
-          onChange={(e) => handleChange('email', e.target.value)}
+          type="text"
+          placeholder="Enter username"
+          value={formData.username}
+          onChange={(e) => handleChange('username', e.target.value)}
         />
       </div>
       
@@ -572,7 +574,7 @@ const AddUserForm: React.FC<{ onClose: () => void; onCreateUser: (userData: any)
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={loading || !formData.name || !formData.email || !formData.role || !formData.password}>
+        <Button type="submit" disabled={loading || !formData.name || !formData.username || !formData.role || !formData.password}>
           {loading ? 'Creating...' : 'Add User'}
         </Button>
       </div>

@@ -21,7 +21,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
   const [showAddOfficialDialog, setShowAddOfficialDialog] = useState(false);
   const [newOfficial, setNewOfficial] = useState({
     name: '',
-    email: '',
+    username: '',
     department: '',
     password: ''
   });
@@ -383,12 +383,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
             </div>
             
             <div>
-              <label className="text-sm font-medium">Email</label>
+              <label className="text-sm font-medium">Username</label>
               <Input
-                type="email"
-                value={newOfficial.email}
-                onChange={(e) => setNewOfficial(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="official@city.gov"
+                type="text"
+                value={newOfficial.username}
+                onChange={(e) => setNewOfficial(prev => ({ ...prev, username: e.target.value }))}
+                placeholder="official_username"
               />
             </div>
             

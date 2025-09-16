@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BottomNavigation } from './BottomNavigation';
+import { HamburgerMenu } from './HamburgerMenu';
 import { NewHomePage } from './NewHomePage';
 import { TrendingPage } from './TrendingPage';
 import { GovernmentDashboard } from './GovernmentDashboard';
@@ -7,7 +7,8 @@ import { AdminDashboard } from './AdminDashboard';
 import { GovernmentOfficialDashboard } from './GovernmentOfficialDashboard';
 import { WorkerDashboard } from './WorkerDashboard';
 import { CitizenDashboard } from './CitizenDashboard';
-import { NewCreatePost } from './NewCreatePost';
+import { EnhancedCreatePost } from './EnhancedCreatePost';
+import { EnhancedFeed } from './EnhancedFeed';
 import { NewProfilePage } from './NewProfilePage';
 import { GovernmentHomePage } from './GovernmentHomePage';
 import { IssuesPage } from './IssuesPage';
@@ -80,7 +81,7 @@ export const NewMainApp: React.FC = () => {
       // Citizens get the new page-based navigation
       switch (currentPage) {
         case 'home':
-          return <CitizenHomePage />;
+          return <EnhancedFeed onCreatePost={() => setShowCreatePost(true)} />;
         case 'reports':
           return <CitizenReportsPage />;
         case 'create':
@@ -88,14 +89,14 @@ export const NewMainApp: React.FC = () => {
         case 'profile':
           return <CitizenProfilePage />;
         default:
-          return <CitizenHomePage />;
+          return <EnhancedFeed onCreatePost={() => setShowCreatePost(true)} />;
       }
     }
 
     // Fallback for unauthenticated users
     switch (currentPage) {
       case 'home':
-        return <NewHomePage user={user} />;
+        return <EnhancedFeed onCreatePost={() => setShowCreatePost(true)} />;
       case 'trending':
         return <TrendingPage />;
       case 'government':
@@ -103,24 +104,40 @@ export const NewMainApp: React.FC = () => {
       case 'profile':
         return <NewProfilePage user={user} onLogout={() => {}} />;
       default:
-        return <NewHomePage user={user} />;
+        return <EnhancedFeed onCreatePost={() => setShowCreatePost(true)} />;
     }
   };
 
   if (showCreatePost) {
-    return <NewCreatePost user={user} onClose={() => setShowCreatePost(false)} />;
+    return <EnhancedCreatePost user={user} onClose={() => setShowCreatePost(false)} />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-md mx-auto bg-white min-h-screen relative">
-        {renderCurrentPage()}
-        <BottomNavigation 
-          currentPage={currentPage} 
-          onPageChange={setCurrentPage}
-          onCreatePost={() => setShowCreatePost(true)}
-          userRole={user?.role}
-        />
+        {/* Header with Hamburger Menu */}
+        <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+          <div className="flex h-16 items-center justify-between px-4">
+            <HamburgerMenu 
+              currentPage={currentPage} 
+              onPageChange={setCurrentPage}
+              onCreatePost={() => setShowCreatePost(true)}
+              userRole={user?.role}
+            />
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold">🏛️</span>
+              </div>
+              <h1 className="text-lg font-bold text-gray-900">Citizen Sphere</h1>
+            </div>
+            <div className="w-10"></div> {/* Spacer for centering */}
+          </div>
+        </header>
+        
+        {/* Main Content */}
+        <main className="pb-4">
+          {renderCurrentPage()}
+        </main>
       </div>
     </div>
   );

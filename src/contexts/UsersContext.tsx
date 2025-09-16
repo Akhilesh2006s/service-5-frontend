@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 interface User {
   id: number;
   name: string;
-  email: string;
+  username: string;
   role: 'government' | 'worker' | 'citizen' | 'admin';
   department?: string;
   designation?: string;
@@ -37,7 +37,7 @@ const loadUsersFromStorage = (): { governmentOfficials: User[], workers: User[] 
       {
         id: 1,
         name: 'Akhilesh',
-        email: 'akhilesh@city.gov',
+        username: 'akhilesh',
         role: 'government' as const,
         department: 'Public Works',
         designation: 'Senior Officer',
@@ -52,7 +52,7 @@ const loadUsersFromStorage = (): { governmentOfficials: User[], workers: User[] 
       {
         id: 2,
         name: 'Sarah Johnson',
-        email: 'sarah.johnson@city.gov',
+        username: 'sarah_johnson',
         role: 'government' as const,
         department: 'Sanitation',
         designation: 'Department Head',
@@ -77,7 +77,7 @@ const loadUsersFromStorage = (): { governmentOfficials: User[], workers: User[] 
       {
         id: 1,
         name: 'Mike Davis',
-        email: 'mike.davis@city.gov',
+        username: 'mike_davis',
         role: 'worker' as const,
         department: 'Public Works',
         designation: 'Field Supervisor',
@@ -92,7 +92,7 @@ const loadUsersFromStorage = (): { governmentOfficials: User[], workers: User[] 
       {
         id: 2,
         name: 'Lisa Wilson',
-        email: 'lisa.wilson@city.gov',
+        username: 'lisa_wilson',
         role: 'worker' as const,
         department: 'Road Maintenance',
         designation: 'Maintenance Worker',

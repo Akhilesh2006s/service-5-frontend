@@ -25,18 +25,27 @@ interface Post {
   mediaFiles?: MediaFile[];
   hashtags: string[];
   location: string;
-  status: 'pending' | 'assigned' | 'in_progress' | 'completed';
+  status: 'pending' | 'assigned' | 'in_progress' | 'completed' | 'reviewed';
   assignedTo?: string | null;
   assignedBy?: string | null;
   assignedAt?: string | null;
   assignedWorker?: string | null;
   priority?: 'low' | 'medium' | 'high';
   notes?: string;
+  instructions?: string;
   department?: string;
   completedAt?: string;
   completedBy?: string;
   workDone?: string;
   timeSpent?: string;
+  completionNotes?: string;
+  completionMedia?: MediaFile[];
+  completionPhotos?: MediaFile[];
+  completionVideos?: MediaFile[];
+  materialsUsed?: string[];
+  cost?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
   createdAt: string;
   likes: number;
   comments: number;
@@ -195,6 +204,20 @@ const convertBackendPost = (backendPost: any): Post => {
     assignedWorker: backendPost.assignedWorker || null,
     priority: backendPost.priority || 'medium',
     notes: backendPost.notes || '',
+    instructions: backendPost.instructions || '',
+    department: backendPost.department || '',
+    completedAt: backendPost.completedAt || null,
+    completedBy: backendPost.completedBy || null,
+    workDone: backendPost.workDone || null,
+    timeSpent: backendPost.timeSpent || null,
+    completionNotes: backendPost.completionNotes || null,
+    completionMedia: backendPost.completionMedia || null,
+    completionPhotos: backendPost.completionPhotos || null,
+    completionVideos: backendPost.completionVideos || null,
+    materialsUsed: backendPost.materialsUsed || null,
+    cost: backendPost.cost || null,
+    reviewedBy: backendPost.reviewedBy || null,
+    reviewedAt: backendPost.reviewedAt || null,
     createdAt: backendPost.createdAt ? new Date(backendPost.createdAt).toLocaleString() : 'Unknown',
     likes: Array.isArray(backendPost.upvotes) ? backendPost.upvotes.length : (backendPost.upvotes || 0),
     comments: backendPost.comments?.length || 0,
@@ -280,6 +303,12 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       location: 'Main Street, Downtown',
       status: 'assigned',
       assignedTo: 'Public Works Department',
+      assignedBy: 'Government Official',
+      assignedAt: '2025-01-16T10:00:00Z',
+      assignedWorker: 'John Smith',
+      priority: 'high',
+      instructions: 'Replace the faulty LED bulb and clean the fixture',
+      notes: 'Urgent - safety concern for pedestrians',
       createdAt: '2 hours ago',
       likes: 12,
       comments: 5,
@@ -324,6 +353,36 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       location: 'Pine Street',
       status: 'completed',
       assignedTo: 'Sanitation Department',
+      assignedBy: 'Government Official',
+      assignedAt: '2025-01-15T14:00:00Z',
+      assignedWorker: 'Jane Doe',
+      priority: 'medium',
+      instructions: 'Collect all missed garbage and ensure regular pickup schedule',
+      notes: 'Residents are concerned about health and safety',
+      completedAt: '2025-01-16T16:30:00Z',
+      completedBy: 'Jane Doe',
+      workDone: 'Collected all missed garbage from Pine Street. Verified that the regular pickup schedule is now back on track. All residents have been notified.',
+      timeSpent: '2 hours 15 minutes',
+      completionNotes: 'The issue was caused by a truck breakdown. All garbage has been collected and the schedule is restored.',
+      completionMedia: [
+        {
+          file: null,
+          url: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2f6c5?w=500',
+          type: 'image',
+          filename: 'garbage_collection_complete.jpg'
+        }
+      ],
+      completionPhotos: [
+        {
+          file: null,
+          url: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2f6c5?w=500',
+          type: 'image',
+          filename: 'garbage_collection_complete.jpg'
+        }
+      ],
+      completionVideos: [],
+      materialsUsed: ['Garbage truck', 'Safety equipment', 'Cleaning supplies'],
+      cost: '$150.00',
       createdAt: '1 day ago',
       likes: 15,
       comments: 8,
@@ -371,11 +430,25 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
               content: 'The street lights on Main Street have been out for 3 days now. It\'s getting dangerous to walk at night. #streetlights #safety #mainstreet',
               image: null,
               video: null,
-              mediaFiles: [],
+              mediaFiles: [
+                {
+                  file: null,
+                  url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500&h=300&fit=crop',
+                  type: 'image',
+                  base64Data: null,
+                  uploadedAt: new Date().toISOString()
+                }
+              ],
               hashtags: ['#streetlights', '#safety', '#mainstreet'],
               location: 'Main Street, Downtown',
               status: 'assigned',
               assignedTo: 'Public Works Department',
+              assignedWorker: 'Mike Johnson',
+              assignedBy: 'Sarah Wilson (Government Official)',
+              assignedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+              priority: 'high',
+              instructions: 'Replace the broken street light and ensure proper illumination',
+              notes: 'High priority due to safety concerns',
               createdAt: '2 hours ago',
               likes: 12,
               comments: 5,
@@ -387,7 +460,15 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
               content: 'Large pothole on Oak Avenue causing traffic issues. Cars are swerving to avoid it. #potholes #roads #oakavenue',
               image: null,
               video: null,
-              mediaFiles: [],
+              mediaFiles: [
+                {
+                  file: null,
+                  url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=300&fit=crop',
+                  type: 'image',
+                  base64Data: null,
+                  uploadedAt: new Date().toISOString()
+                }
+              ],
               hashtags: ['#potholes', '#roads', '#oakavenue'],
               location: 'Oak Avenue',
               status: 'pending',
@@ -403,11 +484,53 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
               content: 'Garbage collection was missed on Pine Street. Bins are overflowing. #garbage #sanitation #missedcollection',
               image: null,
               video: null,
-              mediaFiles: [],
+              mediaFiles: [
+                {
+                  file: null,
+                  url: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2fcc0?w=500&h=300&fit=crop',
+                  type: 'image',
+                  base64Data: null,
+                  uploadedAt: new Date().toISOString()
+                }
+              ],
               hashtags: ['#garbage', '#sanitation', '#missedcollection'],
               location: 'Pine Street',
-              status: 'in-progress',
+              status: 'completed',
               assignedTo: 'Sanitation Department',
+              assignedWorker: 'Tom Wilson',
+              assignedBy: 'Lisa Brown (Government Official)',
+              assignedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
+              priority: 'medium',
+              instructions: 'Collect all overflowing garbage bins and ensure proper disposal',
+              notes: 'Residents are complaining about the smell',
+              completedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+              completedBy: 'Tom Wilson',
+              workDone: 'Successfully collected all overflowing garbage bins from Pine Street. All waste has been properly disposed of and the area has been cleaned.',
+              timeSpent: '1 hour 45 minutes',
+              completionNotes: 'The issue was resolved quickly. All residents have been notified that the regular collection schedule is back on track.',
+              completionMedia: [
+                {
+                  file: null,
+                  url: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2fcc0?w=500&h=300&fit=crop',
+                  type: 'image',
+                  base64Data: null,
+                  filename: 'garbage_cleanup_complete.jpg',
+                  uploadedAt: new Date().toISOString()
+                }
+              ],
+              completionPhotos: [
+                {
+                  file: null,
+                  url: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2fcc0?w=500&h=300&fit=crop',
+                  type: 'image',
+                  base64Data: null,
+                  filename: 'garbage_cleanup_complete.jpg',
+                  uploadedAt: new Date().toISOString()
+                }
+              ],
+              completionVideos: [],
+              materialsUsed: ['Garbage truck', 'Cleaning supplies', 'Safety equipment'],
+              cost: '$120.00',
               createdAt: '6 hours ago',
               likes: 15,
               comments: 7,
@@ -424,17 +547,17 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
     }
   }, [token]);
 
-  // Save posts to localStorage whenever posts change (for unauthenticated users)
+  // Save posts to localStorage whenever posts change (for persistence)
   useEffect(() => {
-    if (!token && posts.length > 0) {
-    try {
-      localStorage.setItem('local-gov-posts', JSON.stringify(posts));
+    if (posts.length > 0) {
+      try {
+        localStorage.setItem('local-gov-posts', JSON.stringify(posts));
         console.log('Auto-saved posts to localStorage:', posts.length);
-    } catch (error) {
+      } catch (error) {
         console.error('Error auto-saving posts to localStorage:', error);
       }
     }
-  }, [posts, token]);
+  }, [posts]);
 
   const addPost = async (post: Post) => {
     console.log('Adding new post to local state:', post);
@@ -448,58 +571,74 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
 
   const updatePost = async (id: number, updates: Partial<Post>) => {
     console.log('Updating post:', id, 'with updates:', updates);
+    console.log('Token type:', token ? (token.startsWith('local_') ? 'local' : 'backend') : 'none');
+    console.log('Token value:', token ? token.substring(0, 20) + '...' : 'none');
     
-    if (!token) {
-      // If no token, just update local state
-      setPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.id === id ? { ...post, ...updates } : post
-        )
-      );
-      return;
-    }
+    // Only try backend API if token is a real backend token (not local)
+    if (token && !token.startsWith('local_')) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updates)
+        });
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updates)
-      });
-
-      if (response.ok) {
-        const updatedPost = await response.json();
-        console.log('Backend updated post:', updatedPost);
-        
-        // Convert backend post to frontend format
-        const convertedPost = convertBackendPost(updatedPost);
-        
-        setPosts(prevPosts => 
-          prevPosts.map(post => 
-            post.id === id ? convertedPost : post
-          )
-        );
-      } else {
-        throw new Error('Failed to update post');
+        if (response.ok) {
+          const updatedPost = await response.json();
+          console.log('Backend updated post:', updatedPost);
+          
+          // Convert backend post to frontend format
+          const convertedPost = convertBackendPost(updatedPost);
+          
+          setPosts(prevPosts => 
+            prevPosts.map(post => 
+              post.id === id ? convertedPost : post
+            )
+          );
+          return; // Success, exit early
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.log('Backend update failed:', response.status, response.statusText, errorData);
+          if (response.status === 401) {
+            console.log('401 Unauthorized - token may be invalid or expired');
+            // Don't fall back to local state for auth errors, let the user know
+            throw new Error('Authentication failed. Please log in again.');
+          }
+          console.log('Falling back to local state for non-auth errors');
+        }
+      } catch (err) {
+        console.error('Error updating post via backend:', err);
+        console.log('Falling back to local state update');
       }
-    } catch (err) {
-      console.error('Error updating post:', err);
-      // Fallback to local state
-    setPosts(prevPosts => 
-      prevPosts.map(post => 
-        post.id === id ? { ...post, ...updates } : post
-      )
-    );
     }
+
+    // Fallback to local state update (for local users or when backend fails)
+    console.log('Updating post in local state only (local user or backend failed)');
+    setPosts(prevPosts => {
+      const updatedPosts = prevPosts.map(post => 
+        post.id === id ? { ...post, ...updates } : post
+      );
+      
+      // Save to localStorage for persistence across page reloads
+      try {
+        localStorage.setItem('local-gov-posts', JSON.stringify(updatedPosts));
+        console.log('Saved updated posts to localStorage');
+      } catch (error) {
+        console.error('Error saving posts to localStorage:', error);
+      }
+      
+      return updatedPosts;
+    });
   };
 
   const likePost = async (id: number) => {
     console.log('Liking post:', id);
     
-    if (!token) {
-      // If no token, just update local state
+    if (!token || token.startsWith('local_')) {
+      // If no token or local token, just update local state
       setPosts(prevPosts => 
         prevPosts.map(post => 
           post.id === id ? { ...post, likes: (post.likes || 0) + 1 } : post
@@ -543,8 +682,8 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
   const addComment = async (id: number, text: string) => {
     console.log('Adding comment to post:', id, 'text:', text);
     
-    if (!token) {
-      // If no token, just update local state
+    if (!token || token.startsWith('local_')) {
+      // If no token or local token, just update local state
       setPosts(prevPosts => 
         prevPosts.map(post => 
           post.id === id ? { 
@@ -701,18 +840,31 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
 
   const uploadMediaFiles = async (files: File[]): Promise<MediaFile[]> => {
     try {
+      console.log('Uploading media files:', files);
       const result = await mediaService.convertLocalToBackend(files);
+      console.log('Media upload result:', result);
       return result;
     } catch (error) {
       console.error('Error uploading media files:', error);
       // Fallback to local URLs
-      return files.map(file => ({
-        url: URL.createObjectURL(file),
-        type: file.type.startsWith('image/') ? 'image' : 'video',
-        filename: file.name,
-        size: file.size,
-        uploadedAt: new Date().toISOString()
-      }));
+      const fallbackResult = files.map(file => {
+        const localUrl = URL.createObjectURL(file);
+        console.log('Creating fallback local URL:', {
+          filename: file.name,
+          localUrl: localUrl,
+          type: file.type
+        });
+        return {
+          id: `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          url: localUrl,
+          type: file.type.startsWith('image/') ? 'image' : 'video',
+          filename: file.name,
+          size: file.size,
+          uploadedAt: new Date().toISOString()
+        };
+      });
+      console.log('Using fallback local URLs:', fallbackResult);
+      return fallbackResult;
     }
   };
 

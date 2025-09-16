@@ -17,14 +17,14 @@ export const NewAuthPage: React.FC = () => {
 
   // Login form state
   const [loginData, setLoginData] = useState({
-    email: '',
+    username: '',
     password: ''
   });
 
   // Registration form state
   const [registerData, setRegisterData] = useState({
     name: '',
-    email: '',
+    username: '',
     password: '',
     confirmPassword: '',
     role: 'citizen' as 'citizen' | 'government' | 'admin' | 'worker',
@@ -39,7 +39,7 @@ export const NewAuthPage: React.FC = () => {
     setLoading(true);
     
     try {
-      await login(loginData.email, loginData.password);
+      await login(loginData.username, loginData.password);
       toast({
         title: "Login Successful",
         description: "Welcome back!",
@@ -135,13 +135,13 @@ export const NewAuthPage: React.FC = () => {
             <TabsContent value="login" className="mt-8">
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="login-email" className="text-sm font-semibold text-gray-700">Email Address</Label>
+                  <Label htmlFor="login-username" className="text-sm font-semibold text-gray-700">Username</Label>
                   <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="Enter your email address"
-                    value={loginData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    id="login-username"
+                    type="text"
+                    placeholder="Enter your username"
+                    value={loginData.username}
+                    onChange={(e) => handleInputChange('username', e.target.value)}
                     required
                     className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-xl"
                   />
@@ -190,13 +190,13 @@ export const NewAuthPage: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="register-email" className="text-sm font-semibold text-gray-700">Email Address</Label>
+                  <Label htmlFor="register-username" className="text-sm font-semibold text-gray-700">Username</Label>
                   <Input
-                    id="register-email"
-                    type="email"
-                    placeholder="Enter your email address"
-                    value={registerData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    id="register-username"
+                    type="text"
+                    placeholder="Choose a username"
+                    value={registerData.username}
+                    onChange={(e) => handleInputChange('username', e.target.value)}
                     required
                     className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-xl"
                   />

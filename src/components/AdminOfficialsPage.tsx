@@ -13,7 +13,7 @@ import { UserCheck, Plus, Edit, Trash2, X, Building } from 'lucide-react';
 interface Official {
   _id: string;
   name: string;
-  email: string;
+  username: string;
   department: string;
   designation: string;
   verified: boolean;
@@ -40,7 +40,7 @@ export const AdminOfficialsPage: React.FC = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
+    username: '',
     password: '',
     department: '',
     designation: ''
@@ -98,7 +98,7 @@ export const AdminOfficialsPage: React.FC = () => {
           description: "Government official created successfully!",
         });
         setShowCreateModal(false);
-        setFormData({ name: '', email: '', password: '', department: '', designation: '' });
+        setFormData({ name: '', username: '', password: '', department: '', designation: '' });
         fetchData();
       } else {
         const error = await response.json();
@@ -134,7 +134,7 @@ export const AdminOfficialsPage: React.FC = () => {
         });
         setShowEditModal(false);
         setSelectedOfficial(null);
-        setFormData({ name: '', email: '', password: '', department: '', designation: '' });
+        setFormData({ name: '', username: '', password: '', department: '', designation: '' });
         fetchData();
       } else {
         const error = await response.json();
@@ -181,7 +181,7 @@ export const AdminOfficialsPage: React.FC = () => {
     setSelectedOfficial(official);
     setFormData({
       name: official.name,
-      email: official.email,
+      username: official.username,
       password: '',
       department: official.department,
       designation: official.designation
@@ -274,7 +274,7 @@ export const AdminOfficialsPage: React.FC = () => {
                               {official.verified ? 'Verified' : 'Pending'}
                             </Badge>
                           </div>
-                          <p className="text-gray-600 text-sm mb-1">{official.email}</p>
+                          <p className="text-gray-600 text-sm mb-1">@{official.username}</p>
                           <div className="flex items-center space-x-4 text-xs text-gray-500">
                             <div className="flex items-center space-x-1">
                               <Building className="w-3 h-3" />
@@ -337,13 +337,13 @@ export const AdminOfficialsPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="username">Username</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="e.g., john.smith@gov.com"
+                    id="username"
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    placeholder="e.g., john_smith"
                     required
                   />
                 </div>
@@ -421,13 +421,13 @@ export const AdminOfficialsPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit-email">Email Address</Label>
+                  <Label htmlFor="edit-username">Username</Label>
                   <Input
-                    id="edit-email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="e.g., john.smith@gov.com"
+                    id="edit-username"
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    placeholder="e.g., john_smith"
                     required
                   />
                 </div>

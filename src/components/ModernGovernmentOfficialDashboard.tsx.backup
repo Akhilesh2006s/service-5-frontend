@@ -31,16 +31,8 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [showAddWorkerDialog, setShowAddWorkerDialog] = useState(false);
   const [showReviewDetailsDialog, setShowReviewDetailsDialog] = useState(false);
-  const [showImageModal, setShowImageModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string>('');
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const { posts, updatePost, likePost, addComment, refreshPosts, deletePost } = usePosts();
-
-  // Handle opening image in full screen
-  const handleImageClick = (imageUrl: string) => {
-    setSelectedImage(imageUrl);
-    setShowImageModal(true);
-  };
 
   const handleLikePost = async (postId: string) => {
     try {
@@ -430,350 +422,350 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
     </div>
   );
 
-  //   // const renderAssignTasks = () => (
-  //     <div className="space-y-6">
-  //       <h2 className="text-2xl font-bold">Assign Tasks</h2>
-  //       
-  //       <div className="grid gap-4">
-  //         {posts.filter(post => post.status === 'pending' || post.status === 'assigned').map((post) => (
-  //           <Card key={post.id}>
-  //             <CardContent className="p-6">
-  //               <div className="flex items-center justify-between mb-4">
-  //                 <div className="flex items-center space-x-2">
-  //                   <Badge className={cn("text-xs", getPriorityColor(post.priority))}>
-  //                     {post.priority} priority
-  //                   </Badge>
-  //                   <Badge className={cn("text-xs", getStatusColor(post.status))}>
-  //                     {getStatusIcon(post.status)}
-  //                     <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
-  //                   </Badge>
-  //                 </div>
-  //               </div>
-  //             </CardHeader>
-  //             <CardContent className="pt-0">
-  //               <p className="mb-4">{post.content}</p>
-  //               
-  //               {/* Render media files */}
-  //               {post.mediaFiles && post.mediaFiles.length > 0 && (
-  //                 <div className="mb-4 space-y-2">
-  //                   {post.mediaFiles.map((media: any, index: number) => {
-  //                     console.log('Rendering media:', index, media);
-  //                     return (
-  //                     <div key={index} className="rounded-lg overflow-hidden">
-  //                       {media.type === 'image' ? (
-  //                         <img 
-  //                           src={media.url} 
-  //                           alt={`Post media ${index + 1}`} 
-  //                           className="w-full h-64 object-cover"
-  //                           onLoad={() => console.log('Image loaded successfully:', media.url)}
-  //                           onError={(e) => {
-  //                             console.error('Error loading image:', media.url);
-  //                             console.log('Media object:', media);
-  //                             console.log('Has base64Data:', !!media.base64Data);
-  //                             console.log('Has fallbackImage:', !!media.fallbackImage);
-  //                             // Try base64 fallback if available
-  //                             if (media.base64Data) {
-  //                               console.log('Using base64 fallback for image');
-  //                               (e.target as HTMLImageElement).src = media.base64Data;
-  //                             } else if (media.fallbackImage) {
-  //                               console.log('Using fallback placeholder for image');
-  //                               (e.target as HTMLImageElement).src = media.fallbackImage;
-  //                             } else {
-  //                               console.log('No fallback available, hiding image');
-  //                               (e.target as HTMLImageElement).style.display = 'none';
-  //                             }
-  //                           }}
-  //                         />
-  //                       ) : media.type === 'video' ? (
-  //                         <video 
-  //                           src={media.url} 
-  //                           className="w-full h-64 object-cover"
-  //                           controls
-  //                           onLoadStart={() => console.log('Video loading started:', media.url)}
-  //                           onError={(e) => {
-  //                             console.error('Error loading video:', media.url);
-  //                             console.log('Video media object:', media);
-  //                             console.log('Has base64Data:', !!media.base64Data);
-  //                             console.log('Has fallbackImage:', !!media.fallbackImage);
-  //                             // Try base64 fallback if available
-  //                             if (media.base64Data) {
-  //                               console.log('Using base64 fallback for video');
-  //                               (e.target as HTMLVideoElement).src = media.base64Data;
-  //                             } else if (media.fallbackImage) {
-  //                               console.log('Using fallback placeholder for video');
-  //                               // For videos, we'll show the fallback image instead
-  //                               const videoElement = e.target as HTMLVideoElement;
-  //                               const parentDiv = videoElement.parentElement;
-  //                               if (parentDiv) {
-  //                                 parentDiv.innerHTML = `<img src="${media.fallbackImage}" alt="Video not available" class="w-full h-64 object-cover" />`;
-  //                               }
-  //                             } else {
-  //                               console.log('No fallback available, hiding video');
-  //                               (e.target as HTMLVideoElement).style.display = 'none';
-  //                             }
-  //                           }}
-  //                         />
-  //                       ) : (
-  //                         <div>Unknown media type: {media.type}</div>
-  //                       )}
-  //                     </div>
-  //                     );
-  //                   })}
-  //                 </div>
-  //               )}
-  //               
-  //               {/* Fallback for old image format */}
-  //               {post.image && !post.mediaFiles && (
-  //                 <div className="mb-4 rounded-lg overflow-hidden">
-  //                   <img 
-  //                     src={post.image} 
-  //                     alt="Post" 
-  //                     className="w-full h-64 object-cover"
-  //                     onLoad={() => console.log('Fallback image loaded successfully:', post.image)}
-  //                     onError={(e) => {
-  //                       console.error('Error loading fallback image:', post.image);
-  //                       (e.target as HTMLImageElement).style.display = 'none';
-  //                     }}
-  //                   />
-  //                 </div>
-  //               )}
-  //               
-  //               <div className="flex flex-wrap gap-2 mb-4">
-  //                 {post.hashtags.map((tag, index) => (
-  //                   <Badge key={index} variant="secondary" className="text-xs">
-  //                     <Hash className="h-3 w-3 mr-1" />
-  //                     {tag}
-  //                   </Badge>
-  //                 ))}
-  //               </div>
-  //               
-  //               {/* Assignment Details */}
-  //               {post.status === 'assigned' && post.assignedTo && (
-  //                 <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-  //                   <div className="flex items-center space-x-2 mb-2">
-  //                     <UserPlus className="h-4 w-4 text-blue-600" />
-  //                     <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Assignment Details</span>
-  //                   </div>
-  //                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-  //                     <div>
-  //                       <span className="text-muted-foreground">Assigned to:</span>
-  //                       <span className="ml-2 font-medium text-blue-800 dark:text-blue-200">
-  //                         {typeof post.assignedTo === 'string' ? post.assignedTo : post.assignedTo.name || 'Unknown'}
-  //                       </span>
-  //                     </div>
-  //                     {post.assignedBy && (
-  //                       <div>
-  //                         <span className="text-muted-foreground">Assigned by:</span>
-  //                         <span className="ml-2 font-medium text-blue-800 dark:text-blue-200">{post.assignedBy}</span>
-  //                       </div>
-  //                     )}
-  //                     {post.assignedAt && (
-  //                       <div>
-  //                         <span className="text-muted-foreground">Assigned on:</span>
-  //                         <span className="ml-2 font-medium text-blue-800 dark:text-blue-200">
-  //                           {new Date(post.assignedAt).toLocaleDateString()}
-  //                         </span>
-  //                       </div>
-  //                     )}
-  //                     {post.priority && (
-  //                       <div>
-  //                         <span className="text-muted-foreground">Priority:</span>
-  //                         <span className="ml-2 font-medium text-blue-800 dark:text-blue-200 capitalize">{post.priority}</span>
-  //                       </div>
-  //                     )}
-  //                   </div>
-  //                   {post.notes && (
-  //                     <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
-  //                       <span className="text-muted-foreground text-sm">Notes:</span>
-  //                       <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">{post.notes}</p>
-  //                     </div>
-  //                   )}
-  //                 </div>
-  //               )}
-  //               
-  //               <div className="flex items-center justify-between">
-  //                 <div className="flex items-center space-x-6">
-  //                   <Button 
-  //                     variant="ghost" 
-  //                     size="sm" 
-  //                     className="text-muted-foreground hover:text-red-500"
-  //                     onClick={() => likePost(post.id)}
-  //                   >
-  //                     <Heart className="h-4 w-4 mr-2" />
-  //                     {post.likes}
-  //                   </Button>
-  //                   <Button 
-  //                     variant="ghost" 
-  //                     size="sm" 
-  //                     className="text-muted-foreground hover:text-blue-500"
-  //                     onClick={() => {
-  //                       setSelectedPost(post);
-  //                       setShowCommentDialog(true);
-  //                     }}
-  //                   >
-  //                     <MessageCircle className="h-4 w-4 mr-2" />
-  //                     {post.comments}
-  //                   </Button>
-  //                   <Button variant="ghost" size="sm" className="text-muted-foreground">
-  //                     <Share2 className="h-4 w-4 mr-2" />
-  //                     {post.shares}
-  //                   </Button>
-  //                 </div>
-  //                 <DropdownMenu>
-  //                   <DropdownMenuTrigger asChild>
-  //                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-  //                       <MoreVertical className="h-4 w-4" />
-  //                     </Button>
-  //                   </DropdownMenuTrigger>
-  //                   <DropdownMenuContent align="end">
-  //                     <DropdownMenuItem 
-  //                       onClick={() => {
-  //                         setSelectedPost(post);
-  //                         setShowAssignDialog(true);
-  //                       }}
-  //                     >
-  //                       <UserPlus className="h-4 w-4 mr-2" />
-  //                       Assign Worker
-  //                     </DropdownMenuItem>
-  //                     <DropdownMenuItem 
-  //                       onClick={() => {
-  //                         setSelectedPost(post);
-  //                         setShowStatusDialog(true);
-  //                       }}
-  //                     >
-  //                       <Edit className="h-4 w-4 mr-2" />
-  //                       Update Status
-  //                     </DropdownMenuItem>
-  //                     <DropdownMenuItem 
-  //                       onClick={() => {
-  //                         setSelectedPost(post);
-  //                         setShowCommentDialog(true);
-  //                       }}
-  //                     >
-  //                       <MessageSquare className="h-4 w-4 mr-2" />
-  //                       Add Comment
-  //                     </DropdownMenuItem>
-  //                     <DropdownMenuItem>
-  //                       <Eye className="h-4 w-4 mr-2" />
-  //                       View Details
-  //                     </DropdownMenuItem>
-  //                   </DropdownMenuContent>
-  //                 </DropdownMenu>
-  //               </div>
-  //             </CardContent>
-  //           </Card>
-  //           );
-  //         })}
-  //       </div>
-  //     </div>
-  //   );
-  // 
   const renderAssignTasks = () => (
     <div className="space-y-6">
-        <h2 className="text-2xl font-bold">Assign Tasks</h2>
-        
-        <div className="grid gap-4">
-          {posts.filter(post => post.status === 'pending' || post.status === 'assigned').map((post) => (
-            <Card key={post.id}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <Badge className={cn("text-xs", getPriorityColor(post.priority))}>
-                      {post.priority} priority
-                    </Badge>
-                    <Badge className={cn("text-xs", getStatusColor(post.status))}>
-                      {getStatusIcon(post.status)}
-                      <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
-                    </Badge>
-                  </div>
-                  <span className="text-sm text-muted-foreground">{post.createdAt}</span>
+      <h2 className="text-2xl font-bold">Assign Tasks</h2>
+      
+      <div className="grid gap-4">
+        {posts.filter(post => post.status === 'pending' || post.status === 'assigned').map((post) => (
+          <Card key={post.id}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Badge className={cn("text-xs", getPriorityColor(post.priority))}>
+                    {post.priority} priority
+                  </Badge>
+                  <Badge className={cn("text-xs", getStatusColor(post.status))}>
+                    {getStatusIcon(post.status)}
+                    <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
+                  </Badge>
                 </div>
-                
-                <div className="flex items-start space-x-4">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={post.user.avatar} alt={post.user.name} />
-                    <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-medium mb-2">{post.user.name}</p>
-                    <p className="text-sm text-muted-foreground mb-2">{post.content}</p>
-                    <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      <span>{post.location}</span>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="mb-4">{post.content}</p>
+              
+              {/* Render media files */}
+              {post.mediaFiles && post.mediaFiles.length > 0 && (
+                <div className="mb-4 space-y-2">
+                  {post.mediaFiles.map((media: any, index: number) => {
+                    console.log('Rendering media:', index, media);
+                    return (
+                    <div key={index} className="rounded-lg overflow-hidden">
+                      {media.type === 'image' ? (
+                        <img 
+                          src={media.url} 
+                          alt={`Post media ${index + 1}`} 
+                          className="w-full h-64 object-cover"
+                          onLoad={() => console.log('Image loaded successfully:', media.url)}
+                          onError={(e) => {
+                            console.error('Error loading image:', media.url);
+                            console.log('Media object:', media);
+                            console.log('Has base64Data:', !!media.base64Data);
+                            console.log('Has fallbackImage:', !!media.fallbackImage);
+                            // Try base64 fallback if available
+                            if (media.base64Data) {
+                              console.log('Using base64 fallback for image');
+                              (e.target as HTMLImageElement).src = media.base64Data;
+                            } else if (media.fallbackImage) {
+                              console.log('Using fallback placeholder for image');
+                              (e.target as HTMLImageElement).src = media.fallbackImage;
+                            } else {
+                              console.log('No fallback available, hiding image');
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }
+                          }}
+                        />
+                      ) : media.type === 'video' ? (
+                        <video 
+                          src={media.url} 
+                          className="w-full h-64 object-cover"
+                          controls
+                          onLoadStart={() => console.log('Video loading started:', media.url)}
+                          onError={(e) => {
+                            console.error('Error loading video:', media.url);
+                            console.log('Video media object:', media);
+                            console.log('Has base64Data:', !!media.base64Data);
+                            console.log('Has fallbackImage:', !!media.fallbackImage);
+                            // Try base64 fallback if available
+                            if (media.base64Data) {
+                              console.log('Using base64 fallback for video');
+                              (e.target as HTMLVideoElement).src = media.base64Data;
+                            } else if (media.fallbackImage) {
+                              console.log('Using fallback placeholder for video');
+                              // For videos, we'll show the fallback image instead
+                              const videoElement = e.target as HTMLVideoElement;
+                              const parentDiv = videoElement.parentElement;
+                              if (parentDiv) {
+                                parentDiv.innerHTML = `<img src="${media.fallbackImage}" alt="Video not available" class="w-full h-64 object-cover" />`;
+                              }
+                            } else {
+                              console.log('No fallback available, hiding video');
+                              (e.target as HTMLVideoElement).style.display = 'none';
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div>Unknown media type: {media.type}</div>
+                      )}
                     </div>
-                    
-                    {/* Assignment Details for Assign Tasks view */}
-                    {post.status === 'assigned' && post.assignedTo && (
-                      <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <UserPlus className="h-3 w-3 text-blue-600" />
-                          <span className="text-xs font-medium text-blue-800 dark:text-blue-200">Assignment Details</span>
-                        </div>
-                        <div className="text-xs space-y-1">
-                          <div>
-                            <span className="text-muted-foreground">Assigned to:</span>
-                            <span className="ml-1 font-medium text-blue-800 dark:text-blue-200">
-                              {typeof post.assignedTo === 'string' ? post.assignedTo : post.assignedTo.name || 'Unknown'}
-                            </span>
-                          </div>
-                          {post.assignedBy && (
-                            <div>
-                              <span className="text-muted-foreground">Assigned by:</span>
-                              <span className="ml-1 font-medium text-blue-800 dark:text-blue-200">{post.assignedBy}</span>
-                            </div>
-                          )}
-                          {post.assignedAt && (
-                            <div>
-                              <span className="text-muted-foreground">Assigned on:</span>
-                              <span className="ml-1 font-medium text-blue-800 dark:text-blue-200">
-                                {new Date(post.assignedAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                          )}
-                          {post.notes && (
-                            <div>
-                              <span className="text-muted-foreground">Notes:</span>
-                              <span className="ml-1 text-blue-800 dark:text-blue-200">{post.notes}</span>
-                            </div>
-                          )}
-                        </div>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {/* Fallback for old image format */}
+              {post.image && !post.mediaFiles && (
+                <div className="mb-4 rounded-lg overflow-hidden">
+                  <img 
+                    src={post.image} 
+                    alt="Post" 
+                    className="w-full h-64 object-cover"
+                    onLoad={() => console.log('Fallback image loaded successfully:', post.image)}
+                    onError={(e) => {
+                      console.error('Error loading fallback image:', post.image);
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+              
+              <div className="flex flex-wrap gap-2 mb-4">
+                {post.hashtags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    <Hash className="h-3 w-3 mr-1" />
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+              
+              {/* Assignment Details */}
+              {post.status === 'assigned' && post.assignedTo && (
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <UserPlus className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Assignment Details</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Assigned to:</span>
+                      <span className="ml-2 font-medium text-blue-800 dark:text-blue-200">
+                        {typeof post.assignedTo === 'string' ? post.assignedTo : post.assignedTo.name || 'Unknown'}
+                      </span>
+                    </div>
+                    {post.assignedBy && (
+                      <div>
+                        <span className="text-muted-foreground">Assigned by:</span>
+                        <span className="ml-2 font-medium text-blue-800 dark:text-blue-200">{post.assignedBy}</span>
+                      </div>
+                    )}
+                    {post.assignedAt && (
+                      <div>
+                        <span className="text-muted-foreground">Assigned on:</span>
+                        <span className="ml-2 font-medium text-blue-800 dark:text-blue-200">
+                          {new Date(post.assignedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {post.priority && (
+                      <div>
+                        <span className="text-muted-foreground">Priority:</span>
+                        <span className="ml-2 font-medium text-blue-800 dark:text-blue-200 capitalize">{post.priority}</span>
                       </div>
                     )}
                   </div>
+                  {post.notes && (
+                    <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
+                      <span className="text-muted-foreground text-sm">Notes:</span>
+                      <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">{post.notes}</p>
+                    </div>
+                  )}
                 </div>
-                
-                <div className="mt-4 flex justify-end">
-                  {post.status === 'pending' ? (
-                    <Button 
+              )}
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-6">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-muted-foreground hover:text-red-500"
+                    onClick={() => likePost(post.id)}
+                  >
+                    <Heart className="h-4 w-4 mr-2" />
+                    {post.likes}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-muted-foreground hover:text-blue-500"
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setShowCommentDialog(true);
+                    }}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    {post.comments}
+                  </Button>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground">
+                    <Share2 className="h-4 w-4 mr-2" />
+                    {post.shares}
+                  </Button>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem 
                       onClick={() => {
                         setSelectedPost(post);
                         setShowAssignDialog(true);
                       }}
-                      size="sm"
                     >
                       <UserPlus className="h-4 w-4 mr-2" />
                       Assign Worker
-                    </Button>
-                  ) : (
-                    <Button 
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
                       onClick={() => {
                         setSelectedPost(post);
-                        setShowAssignDialog(true);
+                        setShowStatusDialog(true);
                       }}
-                      variant="outline"
-                      size="sm"
                     >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Update Status
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        setSelectedPost(post);
+                        setShowCommentDialog(true);
+                      }}
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Add Comment
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
                       <Eye className="h-4 w-4 mr-2" />
-                      View Assignment
-                    </Button>
+                      View Details
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const renderAssignTasks = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Assign Tasks</h2>
+      
+      <div className="grid gap-4">
+        {posts.filter(post => post.status === 'pending' || post.status === 'assigned').map((post) => (
+          <Card key={post.id}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Badge className={cn("text-xs", getPriorityColor(post.priority))}>
+                    {post.priority} priority
+                  </Badge>
+                  <Badge className={cn("text-xs", getStatusColor(post.status))}>
+                    {getStatusIcon(post.status)}
+                    <span className="ml-1 capitalize">{post.status.replace('_', ' ')}</span>
+                  </Badge>
+                </div>
+                <span className="text-sm text-muted-foreground">{post.createdAt}</span>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={post.user.avatar} alt={post.user.name} />
+                  <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <p className="font-medium mb-2">{post.user.name}</p>
+                  <p className="text-sm text-muted-foreground mb-2">{post.content}</p>
+                  <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                    <MapPin className="h-3 w-3" />
+                    <span>{post.location}</span>
+                  </div>
+                  
+                  {/* Assignment Details for Assign Tasks view */}
+                  {post.status === 'assigned' && post.assignedTo && (
+                    <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <UserPlus className="h-3 w-3 text-blue-600" />
+                        <span className="text-xs font-medium text-blue-800 dark:text-blue-200">Assignment Details</span>
+                      </div>
+                      <div className="text-xs space-y-1">
+                        <div>
+                          <span className="text-muted-foreground">Assigned to:</span>
+                          <span className="ml-1 font-medium text-blue-800 dark:text-blue-200">
+                            {typeof post.assignedTo === 'string' ? post.assignedTo : post.assignedTo.name || 'Unknown'}
+                          </span>
+                        </div>
+                        {post.assignedBy && (
+                          <div>
+                            <span className="text-muted-foreground">Assigned by:</span>
+                            <span className="ml-1 font-medium text-blue-800 dark:text-blue-200">{post.assignedBy}</span>
+                          </div>
+                        )}
+                        {post.assignedAt && (
+                          <div>
+                            <span className="text-muted-foreground">Assigned on:</span>
+                            <span className="ml-1 font-medium text-blue-800 dark:text-blue-200">
+                              {new Date(post.assignedAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
+                        {post.notes && (
+                          <div>
+                            <span className="text-muted-foreground">Notes:</span>
+                            <span className="ml-1 text-blue-800 dark:text-blue-200">{post.notes}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </div>
+              
+              <div className="mt-4 flex justify-end">
+                {post.status === 'pending' ? (
+                  <Button 
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setShowAssignDialog(true);
+                    }}
+                    size="sm"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Assign Worker
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setShowAssignDialog(true);
+                    }}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Assignment
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-    );
+    </div>
+  );
 
   const renderReviewWork = () => (
     <div className="space-y-6">
@@ -931,7 +923,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                             src={media.url}
                             alt={`Completion photo ${index + 1}`}
                             className="w-full h-24 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => handleImageClick(media.url)}
+                            onClick={() => window.open(media.url, '_blank')}
                           />
                         ) : (
                           <div className="w-full h-24 bg-muted rounded-lg border flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors">
@@ -946,7 +938,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
                             size="sm"
                             variant="secondary"
                             className="h-6 w-6 p-0"
-                            onClick={() => handleImageClick(media.url)}
+                            onClick={() => window.open(media.url, '_blank')}
                           >
                             <Eye className="h-3 w-3" />
                           </Button>
@@ -1280,46 +1272,6 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
               />
             )}
           </ScrollArea>
-        </DialogContent>
-      </Dialog>
-
-      {/* Full Screen Image Modal */}
-      <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
-        <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 bg-black/95 border-none m-0 rounded-none">
-          <div className="relative w-full h-full overflow-auto">
-            <div className="min-h-full min-w-full flex items-center justify-center p-4">
-              <img
-                src={selectedImage}
-                alt="Full screen completion photo"
-                className="max-w-full max-h-full object-contain cursor-pointer"
-                style={{
-                  maxWidth: 'calc(100vw - 2rem)',
-                  maxHeight: 'calc(100vh - 2rem)',
-                  width: 'auto',
-                  height: 'auto'
-                }}
-                onClick={() => setShowImageModal(false)}
-                onLoad={(e) => {
-                  const img = e.target as HTMLImageElement;
-                  // If image is smaller than viewport, center it
-                  if (img.naturalWidth < window.innerWidth - 100 && img.naturalHeight < window.innerHeight - 100) {
-                    img.style.maxWidth = 'none';
-                    img.style.maxHeight = 'none';
-                    img.style.width = 'auto';
-                    img.style.height = 'auto';
-                  }
-                }}
-              />
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white border-none z-10"
-              onClick={() => setShowImageModal(false)}
-            >
-              ✕
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
     </div>
@@ -1862,7 +1814,7 @@ const WorkReviewDetails: React.FC<{ post: any; onClose: () => void; onApprove: (
                       src={photoUrl} 
                       alt={photoAlt} 
                       className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => handleImageClick(photoUrl)}
+                      onClick={() => window.open(photoUrl, '_blank')}
                       onError={(e) => {
                         console.error(`Failed to load photo ${index}:`, photoUrl);
                         e.currentTarget.style.display = 'none';

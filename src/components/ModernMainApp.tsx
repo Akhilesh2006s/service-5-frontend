@@ -22,6 +22,7 @@ interface ModernMainAppProps {
 
 export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
   const { theme, setTheme } = useTheme();
   const [currentView, setCurrentView] = useState('home');
   const [worker, setWorker] = useState<any>(null);
@@ -68,8 +69,7 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
 
   const getNavigationItems = () => {
     const baseItems = [
-      { id: 'home', label: 'Home', icon: Home },
-      { id: 'trending', label: 'Trending', icon: TrendingUp },
+      { id: 'home', label: 'Dashboard', icon: Home },
     ];
 
     switch (user.role) {
@@ -83,11 +83,9 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
       case 'government':
         return [
           ...baseItems,
-          { id: 'department-feed', label: 'Department Feed', icon: Users },
           { id: 'assign-tasks', label: 'Assign Tasks', icon: CheckCircle },
           { id: 'review-work', label: 'Review Work', icon: FileText },
           { id: 'manage-workers', label: 'Manage Workers', icon: Users },
-          { id: 'test-media', label: 'Test Media', icon: BarChart3 },
         ];
       case 'worker':
         return [
@@ -145,6 +143,7 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center space-x-4">
+            {/* Mobile hamburger menu */}
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
@@ -152,6 +151,17 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
+            
+            {/* Desktop hamburger menu */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="hidden md:flex"
+              onClick={() => setDesktopSidebarOpen(!desktopSidebarOpen)}
+            >
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle sidebar</span>
+            </Button>
               <SheetContent side="left" className="w-72 p-0">
                 <div className="flex h-full flex-col">
                   <div className="flex items-center justify-between p-6">
@@ -264,71 +274,74 @@ export const ModernMainApp: React.FC<ModernMainAppProps> = ({ user, onLogout }) 
         </div>
       </header>
 
-      {/* Desktop Sidebar */}
+      {/* Desktop Layout */}
       <div className="hidden md:flex">
-        <aside className="w-64 border-r bg-background">
-          <div className="flex h-full flex-col">
-            <div className="p-6">
-              <div className="flex items-center space-x-3">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name?.charAt(0) || 'U'}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{user.name}</p>
-                  <Badge className={cn("text-xs mt-1", getRoleColor(user.role))}>
-                    {getRoleIcon(user.role)}
-                    <span className="ml-1 capitalize">{user.role?.replace('_', ' ')}</span>
-                  </Badge>
+        {/* Desktop Sidebar */}
+        {desktopSidebarOpen && (
+          <aside className="w-64 border-r bg-background">
+            <div className="flex h-full flex-col">
+              <div className="p-6">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarFallback>{user.name?.charAt(0) || 'U'}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{user.name}</p>
+                    <Badge className={cn("text-xs mt-1", getRoleColor(user.role))}>
+                      {getRoleIcon(user.role)}
+                      <span className="ml-1 capitalize">{user.role?.replace('_', ' ')}</span>
+                    </Badge>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <Separator />
-            
-            <ScrollArea className="flex-1 px-4">
-              <nav className="space-y-2 py-4">
-                {navigationItems.map((item) => (
-                  <Button
-                    key={item.id}
-                    variant={currentView === item.id ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                    onClick={() => setCurrentView(item.id)}
-                  >
-                    <item.icon className="mr-2 h-4 w-4" />
-                    {item.label}
-                  </Button>
-                ))}
-              </nav>
-            </ScrollArea>
-            
-            <Separator />
-            
-            <div className="p-4 space-y-2">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              >
-                {theme === 'dark' ? (
-                  <Sun className="mr-2 h-4 w-4" />
-                ) : (
-                  <Moon className="mr-2 h-4 w-4" />
-                )}
-                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-              </Button>
               
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-destructive hover:text-destructive"
-                onClick={onLogout}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
+              <Separator />
+              
+              <ScrollArea className="flex-1 px-4">
+                <nav className="space-y-2 py-4">
+                  {navigationItems.map((item) => (
+                    <Button
+                      key={item.id}
+                      variant={currentView === item.id ? "secondary" : "ghost"}
+                      className="w-full justify-start"
+                      onClick={() => setCurrentView(item.id)}
+                    >
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {item.label}
+                    </Button>
+                  ))}
+                </nav>
+              </ScrollArea>
+              
+              <Separator />
+              
+              <div className="p-4 space-y-2">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Moon className="mr-2 h-4 w-4" />
+                  )}
+                  {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-destructive hover:text-destructive"
+                  onClick={onLogout}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
             </div>
-          </div>
-        </aside>
+          </aside>
+        )}
         
         {/* Main Content */}
         <main className="flex-1">
