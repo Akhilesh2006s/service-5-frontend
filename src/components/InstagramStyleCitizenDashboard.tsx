@@ -561,10 +561,12 @@ export const InstagramStyleCitizenDashboard: React.FC<CitizenDashboardProps> = (
                   comments: post.comments || [],
                   isLiked: false
                 }}
+                currentUser={user}
                 onLike={handleLikePost}
                 onComment={handleAddComment}
                 onShare={handleSharePost}
                 onBookmark={handleBookmarkPost}
+                onDelete={deletePost}
               />
             ))
           )}

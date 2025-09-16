@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ChevronLeft, ChevronRight, Flag, Copy, Share2 } from 'lucide-react';
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ChevronLeft, ChevronRight, Flag, Copy, Share2, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface InstagramPostCardProps {
@@ -26,18 +26,25 @@ interface InstagramPostCardProps {
     }>;
     isLiked?: boolean;
   };
+  currentUser?: {
+    name: string;
+    role: string;
+  };
   onLike: (postId: string) => void;
   onComment: (postId: string, comment: string) => void;
   onShare: (postId: string) => void;
   onBookmark: (postId: string) => void;
+  onDelete?: (postId: string) => void;
 }
 
 export const InstagramPostCard: React.FC<InstagramPostCardProps> = ({
   post,
+  currentUser,
   onLike,
   onComment,
   onShare,
-  onBookmark
+  onBookmark,
+  onDelete
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [newComment, setNewComment] = useState('');
@@ -116,6 +123,19 @@ export const InstagramPostCard: React.FC<InstagramPostCardProps> = ({
               <Share2 className="w-4 h-4 mr-2" />
               Share Post
             </DropdownMenuItem>
+            {currentUser && currentUser.name === post.user.name && onDelete && (
+              <DropdownMenuItem 
+                className="text-red-400 hover:text-red-300 hover:bg-gray-700 cursor-pointer"
+                onClick={() => {
+                  if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+                    onDelete(post.id);
+                  }
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Post
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem 
               className="text-gray-300 hover:text-white hover:bg-gray-700 cursor-pointer"
               onClick={() => {
