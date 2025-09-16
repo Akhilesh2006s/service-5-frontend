@@ -392,9 +392,32 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
       </div>
 
       <div className="grid gap-4">
-        {posts.map((post) => {
-          return (
-          <Card key={post.id} className="overflow-hidden">
+        {posts.map((post) => (
+          <InstagramPostCard
+            key={post.id}
+            post={{
+              id: post.id,
+              user: {
+                name: post.user.name,
+                avatar: post.user.avatar || `https://ui-avatars.com/api/?name=${post.user.name}&background=random`,
+                role: post.user.role || 'citizen'
+              },
+              content: post.content,
+              mediaFiles: post.mediaFiles || [],
+              location: post.location,
+              createdAt: post.createdAt,
+              likes: post.likes || 0,
+              comments: post.comments || [],
+              isLiked: false
+            }}
+            currentUser={user}
+            onLike={handleLikePost}
+            onComment={handleAddComment}
+            onShare={handleSharePost}
+            onBookmark={handleBookmarkPost}
+            onDelete={handleDeletePost}
+          />
+        ))}
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
