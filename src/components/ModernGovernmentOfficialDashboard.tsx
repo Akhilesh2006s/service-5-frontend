@@ -419,24 +419,18 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
           />
         ))}
       </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={post.user.avatar} alt={post.user.name} />
-                    <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{post.user.name}</p>
-                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      <span>{post.createdAt}</span>
-                      <span>•</span>
-                      <div className="flex items-center space-x-1">
-                        <MapPin className="h-3 w-3" />
-                        <span>{post.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+    </div>
+  );
+
+  const renderAssignTasks = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Assign Tasks</h2>
+      
+      <div className="grid gap-4">
+        {posts.filter(post => post.status === 'pending' || post.status === 'assigned').map((post) => (
+          <Card key={post.id}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
                   <Badge className={cn("text-xs", getPriorityColor(post.priority))}>
                     {post.priority} priority
