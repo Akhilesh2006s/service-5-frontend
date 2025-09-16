@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ChevronLeft, ChevronRight, Flag, Copy, Share2 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface InstagramPostCardProps {
   post: {
@@ -91,9 +92,44 @@ export const InstagramPostCard: React.FC<InstagramPostCardProps> = ({
             )}
           </div>
         </div>
-        <button className="p-1 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white">
-          <MoreHorizontal className="w-5 h-5" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-1 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white">
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 bg-gray-800 border-gray-700">
+            <DropdownMenuItem 
+              className="text-gray-300 hover:text-white hover:bg-gray-700 cursor-pointer"
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                // You could add a toast notification here
+              }}
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              Copy Link
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="text-gray-300 hover:text-white hover:bg-gray-700 cursor-pointer"
+              onClick={() => onShare(post.id)}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share Post
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="text-gray-300 hover:text-white hover:bg-gray-700 cursor-pointer"
+              onClick={() => {
+                if (confirm('Are you sure you want to report this post?')) {
+                  // Add report functionality here
+                  console.log('Reporting post:', post.id);
+                }
+              }}
+            >
+              <Flag className="w-4 h-4 mr-2" />
+              Report Post
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Media Section */}
