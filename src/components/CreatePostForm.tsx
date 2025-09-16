@@ -20,6 +20,7 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, o
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const { uploadMediaFiles } = usePosts();
+  const { token } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +54,6 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, o
       }
 
       // Send to backend first
-      const { token } = useAuth();
       const API_BASE_URL = 'https://service-5-backend-production.up.railway.app/api';
       
       if (token) {
