@@ -30,6 +30,11 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, o
       return;
     }
 
+    if (content.trim().length < 5) {
+      alert('Please provide a more detailed description (at least 5 characters)');
+      return;
+    }
+
     if (location.trim().length < 3) {
       alert('Location must be at least 3 characters long');
       return;
@@ -56,12 +61,16 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, o
       // Send to backend first
       const API_BASE_URL = 'https://service-5-backend-production.up.railway.app/api';
       
+      console.log('Content state:', content);
+      console.log('Content length:', content.length);
+      console.log('Content trimmed:', content.trim());
+      
       if (token) {
         try {
           // Prepare data for backend
           const postData = {
-            title: content.substring(0, 100), // Use first 100 chars as title
-            description: content,
+            title: content.trim().substring(0, 100) || 'Untitled Post', // Use first 100 chars as title, fallback if empty
+            description: content.trim() || 'No description provided', // Fallback if empty
             category: 'other', // Default category
             priority: 'medium',
             location: location,
@@ -210,7 +219,7 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, o
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={loading || !content.trim() || !location.trim()}>
+        <Button type="submit" disabled={loading || !content.trim() || !location.trim() || content.trim().length < 5 || location.trim().length < 3}>
           {loading ? 'Creating...' : 'Create Post'}
         </Button>
       </div>
