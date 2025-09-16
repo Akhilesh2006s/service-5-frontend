@@ -418,7 +418,7 @@ export const GovernmentOfficialDashboard: React.FC<GovernmentOfficialDashboardPr
             onDelete={handleDeletePost}
           />
         ))}
-            <CardHeader className="pb-3">
+      </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-10 w-10">
