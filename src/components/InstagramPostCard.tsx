@@ -72,10 +72,6 @@ export const InstagramPostCard: React.FC<InstagramPostCardProps> = ({
 
   return (
     <div className="bg-gray-900 border border-gray-700 rounded-lg mb-6 max-w-2xl mx-auto">
-      {/* DEBUG: Instagram Post Card is working! */}
-      <div className="bg-yellow-500 text-black p-2 text-center text-sm font-bold">
-        🎉 INSTAGRAM STYLE POST CARD IS WORKING! 🎉
-      </div>
       {/* Post Header */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center space-x-3">
