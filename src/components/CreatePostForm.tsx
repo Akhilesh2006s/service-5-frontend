@@ -65,6 +65,7 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ user, onClose, o
       console.log('Content state:', content);
       console.log('Content length:', content.length);
       console.log('Content trimmed:', content.trim());
+      console.log('Token being used:', token ? `${token.substring(0, 20)}...` : 'No token');
       
       if (token) {
         try {

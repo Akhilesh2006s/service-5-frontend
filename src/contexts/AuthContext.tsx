@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 interface User {
   id: string;
   name: string;
-  email: string;
+  username: string;
   role: 'citizen' | 'government' | 'worker' | 'admin';
   verified: boolean;
   aadhaarNumber?: string;
@@ -15,7 +15,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
   logout: () => void;
   loading: boolean;
@@ -23,7 +23,7 @@ interface AuthContextType {
 
 interface RegisterData {
   name: string;
-  email: string;
+  username: string;
   password: string;
   role: 'citizen' | 'government' | 'worker' | 'admin';
   aadhaarNumber?: string;
@@ -82,6 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const fetchUserProfile = async (authToken: string) => {
     try {
+      console.log('Fetching user profile with token:', authToken ? `${authToken.substring(0, 20)}...` : 'No token');
       // Check if it's a local token
       if (authToken.startsWith('local_')) {
         // Extract user ID from local token
@@ -130,15 +131,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (username: string, password: string) => {
     try {
-      console.log('Attempting login for:', email);
+      console.log('Attempting login for:', username);
       
-      // First, try to find user in localStorage (for newly created users)
+      // Always try backend API first for proper authentication
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          console.log('Login successful with backend:', data.user);
+          setToken(data.token);
+          setUser(data.user);
+          localStorage.setItem('token', data.token);
+          return;
+        } else {
+          console.log('Backend login failed:', data.message);
+        }
+      } catch (backendError) {
+        console.log('Backend login error:', backendError);
+      }
+
+      // Fallback to local authentication for demo purposes
       const localUsers = getLocalUsers();
       console.log('Local users found:', localUsers);
       
-      const localUser = localUsers.find(u => u.email === email);
+      const localUser = localUsers.find(u => u.username === username);
       console.log('Local user found:', localUser);
       
       if (localUser) {
@@ -147,7 +173,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const userData = {
           id: localUser.id.toString(),
           name: localUser.name,
-          email: localUser.email,
+          username: localUser.username,
           role: localUser.role,
           verified: localUser.verified || true,
           department: localUser.department,
@@ -162,24 +188,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      // If not found locally, try backend API
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setToken(data.token);
-        setUser(data.user);
-        localStorage.setItem('token', data.token);
-      } else {
-        throw new Error(data.message || 'Login failed');
-      }
+      throw new Error('Invalid credentials');
     } catch (error) {
       console.error('Login error:', error);
       throw error;
